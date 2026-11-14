@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr" dir="ltr">
-<head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Osmanlı Edebiyatının Dijital Hafızası</title>
@@ -591,5 +591,10 @@ function App(){
 }
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
 </script>
-</body>
+<script>
+window.supabaseClient = window.supabase.createClient(
+  'https://upinwptzvhaqugqdkomr.supabase.co',
+  'sb_publishable_y7nIwjtta7HvaN_n9j-GJg__k-1QERa'
+);
+</script></body>
 </html>
