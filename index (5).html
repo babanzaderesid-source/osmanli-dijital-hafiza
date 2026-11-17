@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="tr" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Osmanlı Edebiyatının Dijital Hafızası</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&family=Noto+Naskh+Arabic:wght@400;600&family=Source+Sans+3:wght@400;600&family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B1630;--navy2:#14244A;--paper:#F1E7CE;--card:#FBF5E4;--ink:#14203F;--muted:#55607A;--gold:#8A6A22;--goldb:#D2AE5B;--line:rgba(20,32,63,.18);--sea:#27407A;--land:#E4D5AE;--head:'Cormorant Garamond','Times New Roman',serif;--body:'Source Sans 3',system-ui,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#0F1A33;--card:#16274A;--ink:#EFE3C6;--muted:#A9B0C4;--gold:#D2AE5B;--line:rgba(239,227,198,.2);--sea:#0B1630;--land:#1B2D55}}
+:root[data-theme="dark"]{--paper:#0F1A33;--card:#16274A;--ink:#EFE3C6;--muted:#A9B0C4;--gold:#D2AE5B;--line:rgba(239,227,198,.2);--sea:#0B1630;--land:#1B2D55}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 110px);scroll-behavior:smooth}
+html[lang=ar]{--head:'Amiri',serif;--body:'Noto Naskh Arabic',serif}
+html[lang=fa]{--head:'Vazirmatn',sans-serif;--body:'Vazirmatn',sans-serif}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.125rem/1.65 var(--body)}
+html[lang=ar] body,html[lang=fa] body{line-height:1.95}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--navy);z-index:30}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--goldb);outline-offset:2px}
+.wrap{max-width:1160px;margin-inline:auto;padding-inline:20px}
+h1,h2,h3{font-family:var(--head);line-height:1.2;margin:0}
+h2{font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;margin-bottom:.4em}
+p{margin:.4em 0 1em;max-width:68ch}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:1200;background:var(--navy);color:#EFE3C6;border-bottom:1px solid rgba(210,174,91,.5)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 22px;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;font:700 1.15rem/1.2 var(--head);margin-inline-end:auto}
+nav{display:flex;flex-wrap:wrap;gap:2px 4px;order:3;width:100%}
+nav a{color:#EFE3C6;text-decoration:none;padding:6px 12px;border-radius:4px;white-space:nowrap;font-size:.95rem}
+nav a:hover{background:rgba(210,174,91,.18)}
+.langs{display:flex;border:1px solid var(--goldb);border-radius:6px;overflow:hidden}
+.langs button{background:none;border:0;padding:8px 14px;cursor:pointer;color:#EFE3C6}
+.langs button[aria-pressed=true]{background:var(--goldb);color:var(--navy);font-weight:600}
+@media(min-width:900px){nav{order:0;width:auto}}
+.demo{background:#6D1F2B;color:#F8EBD0;text-align:center;font-size:.9rem;padding:6px 16px}
+.hero{background:var(--navy) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cg fill='none' stroke='%23D2AE5B' stroke-opacity='.17'%3E%3Crect x='20' y='20' width='24' height='24'/%3E%3Crect x='20' y='20' width='24' height='24' transform='rotate(45 32 32)'/%3E%3C/g%3E%3C/svg%3E");color:#EFE3C6;padding:36px 0 44px}
+.frame{border:1px solid var(--goldb);outline:1px solid rgba(210,174,91,.55);outline-offset:7px;background:rgba(11,22,48,.88);padding:40px 24px;max-width:960px;margin-block:8px;text-align:center}
+.frame h1{font-size:clamp(2.2rem,7vw,4.4rem);font-weight:700;color:#F3E3B5;margin-bottom:.3em}
+.frame p{margin-inline:auto;color:#D8D2BF;font-size:1.1rem}
+.search{display:flex;gap:8px;max-width:640px;margin:22px auto 0}
+.search input{flex:1;min-width:0;padding:12px 16px;border-radius:6px;border:1px solid var(--goldb);background:#FBF5E4;color:#14203F;font-size:1rem}
+.btn{background:var(--goldb);color:var(--navy);border:0;border-radius:6px;padding:10px 20px;font-weight:600;cursor:pointer}
+.btn.alt{background:none;border:1px solid var(--gold);color:var(--ink)}
+section.blk{padding:36px 0;border-bottom:1px solid var(--line)}
+.mapgrid{display:grid;gap:18px;grid-template-columns:1fr}
+.mapbox{direction:ltr;border:1px solid var(--gold);padding:6px;background:var(--card);min-width:0;position:relative;z-index:0;isolation:isolate}
+.leaflet-map{width:100%;height:440px;min-height:320px;background:#e7e2d4;position:relative;z-index:0}
+@media(max-width:560px){.leaflet-map{height:360px}}
+.map-note{font-size:.95rem;color:var(--muted)}
+.library-popup{min-width:190px;max-width:240px;color:#14203F;font:14px/1.45 system-ui,sans-serif}.library-popup img{display:block;width:100%;max-height:132px;object-fit:cover;border-radius:4px;margin:8px 0}.library-popup button{display:block;width:100%;border:0;border-radius:4px;padding:9px 10px;background:#14244A;color:#F3E3B5;font-weight:600;cursor:pointer;margin-top:8px}
+.mk{cursor:pointer}
+.mk circle.d{fill:var(--goldb);stroke:var(--navy);stroke-width:2}
+.mk[aria-pressed=true] circle.d{fill:#B3303F}
+.mk circle.r{fill:none;stroke:var(--goldb);stroke-width:1.5;opacity:.7}
+.mk text{font:600 18px var(--body);fill:#F3E3B5;paint-order:stroke;stroke:#0B1630;stroke-width:3px}
+.mk:focus-visible{outline:none}.mk:focus-visible circle.r{stroke:#fff;stroke-width:3}
+.panel{background:var(--card);border:1px solid var(--line);padding:20px;border-radius:4px}
+.libbtn{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:start;background:none;border:1px solid var(--line);border-radius:4px;padding:10px 14px;margin-top:8px;cursor:pointer}
+.libbtn[aria-pressed=true]{border-color:var(--gold);box-shadow:inset 3px 0 0 var(--gold);background:rgba(138,106,34,.12)}
+.cards{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr))}
+.fcard{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);padding:18px;display:flex;flex-direction:column;gap:6px}
+.badge{display:inline-block;background:#6D1F2B;color:#F8EBD0;border-radius:3px;padding:2px 10px;font-size:.9rem;font-weight:600}
+.chip{border:1px solid var(--gold);background:none;border-radius:99px;padding:6px 16px;min-height:40px;cursor:pointer;margin-inline-end:6px;margin-bottom:6px}
+.chip[aria-pressed=true]{background:var(--gold);color:var(--card)}
+.mcards{display:grid;gap:22px;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr));margin-top:18px}
+.ms{background:var(--card);border:1px solid var(--gold);outline:1px solid var(--line);outline-offset:4px;padding:24px 22px}
+.ms .top{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.orig{font:700 2.2rem/1.5 'Amiri','Vazirmatn',serif;margin:8px 0 0;text-align:start}
+.tl{font-style:italic;font-size:1.35rem;margin-bottom:6px;color:var(--gold)}
+.ms dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 24px;margin:16px 0 0}
+
+.ms dt{font-size:.95rem;color:var(--muted)}
+.ms dd{margin:0;font-size:1.05rem}
+.ver{grid-column:1/-1;border-top:1px solid var(--line);padding-top:8px}
+.two{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:18px 0}
+.two div{background:var(--card);border-inline-start:4px solid var(--gold);padding:14px 16px}
+.dim{color:var(--muted)}
+.nm{margin-top:14px}.lb{font-size:.95rem;color:var(--muted)}
+.dates{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px 18px;border:1px dashed var(--gold);padding:10px 12px;background:rgba(138,106,34,.08)}
+.ms a{color:var(--gold);font-weight:600}
+.adm{min-height:100vh}.adm-t{font:700 1.25rem var(--head);margin-inline-end:auto}
+.adm-n{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.abtn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:6px;border:1px solid var(--gold);background:none;color:inherit;cursor:pointer;font:600 1rem var(--body);position:relative}
+.abtn:focus-within{outline:3px solid var(--goldb);outline-offset:2px}
+.abtn.p{background:var(--goldb);color:var(--navy);border-color:var(--goldb)}
+.abtn.d{border-color:#B3303F;color:#B3303F}
+.adm-n .abtn[aria-pressed=true]{background:var(--goldb);color:var(--navy)}
+.adm-m{padding-block:20px 60px}
+.tiles{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.tile{min-height:104px;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;background:var(--card);padding:14px 18px;text-align:start}
+.tile b{font:700 2rem var(--head)}
+.arow{background:var(--card);border:1px solid var(--line);border-inline-start:4px solid var(--gold);padding:14px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.fgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.fld{display:block}.fld.w{grid-column:1/-1}
+.fld>span{display:block;font-size:.95rem;color:var(--muted);margin-bottom:4px}
+.fld input:not([type=checkbox]),.fld select,.fld textarea{width:100%;min-height:48px;padding:10px 12px;border:1px solid var(--gold);border-radius:6px;background:var(--card);color:var(--ink);font:1rem var(--body)}
+.fld textarea{min-height:96px}
+.chk{display:inline-flex;align-items:center;gap:8px;min-height:48px;margin-inline-end:18px}.chk input{width:24px;height:24px}
+.warn,.okb{padding:10px 14px;margin:12px 0}
+.warn{background:rgba(109,31,43,.12);border-inline-start:4px solid #6D1F2B}
+.okb{background:rgba(138,106,34,.14);border-inline-start:4px solid var(--gold)}
+.icard{display:grid;grid-template-columns:110px minmax(0,1fr);gap:14px;background:var(--card);border:1px solid var(--line);padding:12px;margin-bottom:12px}
+@media(max-width:560px){.icard{grid-template-columns:1fr}.ithumb{max-width:150px}}
+.ithumb{aspect-ratio:3/4;background:#EBDDB9;overflow:hidden;border:1px solid var(--gold)}
+.ithumb img{width:100%;height:100%;object-fit:cover;display:block}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.ms-open{cursor:pointer}.ms-open:hover{outline-color:var(--gold)}
+.btn.open{margin-top:14px;width:100%;min-height:44px}
+.ov{position:fixed;inset:0;z-index:2000;background:rgba(5,10,24,.6);display:flex;justify-content:flex-end}
+.dw{width:min(1180px,100%);height:100%;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;border-inline-start:2px solid var(--goldb);animation:sl .22s ease-out;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@keyframes sl{from{transform:translateX(var(--sx,40px));opacity:.4}}
+html[dir=rtl] .dw{--sx:-40px}
+@media(prefers-reduced-motion:reduce){.dw{animation:none}}
+.dwh{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--navy);color:#EFE3C6;padding:10px 16px}
+.dwb{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:minmax(0,1fr);align-content:start}
+@media(min-width:900px){.dwb{overflow:hidden;grid-template-columns:minmax(0,1fr) 360px;align-content:stretch}.dwb>div{overflow:auto;min-height:0}}
+.vw{background:var(--card);padding:10px}
+.tb{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.tbn{min-height:40px;min-width:40px;padding:0 12px;border:1px solid var(--gold);background:none;border-radius:6px;cursor:pointer;color:var(--ink);font-size:1rem}
+.tbn:disabled{opacity:.4;cursor:default}
+.sp{flex:1}.pos{font-weight:600}.zl{min-width:48px;text-align:center}
+.stage{height:min(62vh,760px);overflow:auto;background:#0B1630;margin-top:8px;border:1px solid var(--gold);direction:ltr}
+.pg{aspect-ratio:3/4;margin:0 auto;background:#EBDDB9}
+.strip{display:flex;gap:8px;overflow-x:auto;padding:8px 2px;direction:ltr}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;max-height:34vh;overflow:auto;padding:8px 2px;direction:ltr}
+.th{flex:0 0 72px;border:2px solid var(--line);background:none;padding:3px;cursor:pointer;color:var(--ink);font-size:.9rem;border-radius:4px;text-align:center}
+.th[aria-current=true]{border-color:var(--gold);box-shadow:0 0 0 2px var(--goldb)}
+.tp{aspect-ratio:3/4;background:#EBDDB9}
+.ths{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-weight:600}
+.noimg{padding:28px;font-size:1.15rem;border:2px dashed var(--gold);margin:16px;text-align:center}
+.miss{background:rgba(109,31,43,.12);border-inline-start:4px solid #6D1F2B;padding:8px 12px;margin:8px 0 0}
+.dn{font-size:.95rem;color:var(--muted);margin:6px 0 0}
+.icol{padding:8px 4px}
+.dwi{outline:0;border:0;background:transparent;padding:14px 16px}
+.dwi h3{font-size:1.4rem;margin-bottom:6px}
+.vw.fs{position:fixed;inset:0;z-index:2100;display:flex;flex-direction:column;padding:12px;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.vw.fs .stage{height:0;flex:1;min-height:0}
+.frow{margin-bottom:6px}.fl{margin-inline-end:10px}
+.cap{font-size:.95rem;padding:8px 10px 4px}
+.sea{font:600 14px var(--body);fill:#EFE3C6;opacity:.85}
+.ms,.panel,.fcard{min-width:0;overflow-wrap:anywhere}
+@media(max-width:520px){.wrap{padding-inline:16px}.frame{padding:28px 14px;outline-offset:4px}.search{flex-direction:column}.btn{min-height:44px}}
+
+.stats-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:58px;padding:14px 18px;border:1px solid var(--gold);border-radius:6px;background:var(--card);color:var(--ink);font:600 1.15rem var(--head);text-align:start;cursor:pointer}
+.stats-toggle:hover{background:rgba(138,106,34,.08)}
+.stats-chevron{flex:0 0 28px;width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--gold);border-radius:50%;font:600 1.15rem var(--body);color:var(--gold)}
+.stats-details{padding-top:16px}
+footer{background:var(--navy);color:#D8D2BF;padding:30px 0;font-size:.95rem}
+</style>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+window.supabaseClient = window.supabase.createClient(
+  'https://upinwptzvhaqugqdkomr.supabase.co',
+  'sb_publishable_y7nIwjtta7HvaN_n9j-GJg__k-1QERa'
+);
+const {useState,useEffect,useRef}=React,h=React.createElement;
+
+/* ---------- i18n: arayüz metinleri (eser dilinden bağımsız) ---------- */
+const L={
+tr:{brand:'Osmanlı Edebiyatının Dijital Hafızası',short:'Dijital Hafıza',nav:['Kütüphaneler','Harita','Yazmalar','İstatistikler','Nüsha karşılaştırma','Yöntem','İletişim'],
+demoBar:'Canlı katalog: yayımlanmış kayıtlar veritabanından yüklenir; henüz kayıt yoksa katalog boş gösterilir.',
+lead:'1512–1520 yılları arasında telif edilen edebî eserlerin Marmara Bölgesi kütüphanelerindeki yazma nüshalarını kataloglayan, haritada gösteren ve araştırmacıların keşfine açan dijital atlas.',
+ph:'Eser, müellif, kütüphane veya katalog no. ara',go:'Ara',
+mapT:'Marmara Bölgesi Haritası',mapN:'Yalnızca Marmara Bölgesi’nin 11 ilindeki konumu doğrulanmış kütüphaneler gösterilir. Bölge dışındaki kayıtlar proje haritasında yer almaz.',
+pick:'Haritadan bir şehir seçin.',cityF:'Şehir',open:'Ayrıntılar ve dijital görüntüler',close:'Kapat',prev:'Önceki görüntü',next:'Sonraki görüntü',zin:'Yakınlaştır',zout:'Uzaklaştır',fit:'Sığdır',fsB:'Tam ekran',fsX:'Tam ekrandan çık',thumbs:'Sayfa önizlemeleri',strip:'Şerit',grid:'Izgara',imgOf:'Görüntü',folio:'Varak',front:'ön yüz',back:'arka yüz',missMsg:'Bu varak mevcut değil veya görüntülenemiyor; eksik olarak kaydedildi. Yerine görüntü üretilmedi.',miss:'Eksik varak',noImg:'Bu nüsha için henüz dijital görüntü eklenmemiştir.',demoImg:'DEMO yer tutucu: gerçek bir yazma görüntüsü değildir.',iDesc:'Görüntü açıklaması',iSrc:'Görüntü kaynağı',iUrl:'Dosya veya bağlantı',iRt:'Telif ve kullanım',iRtDemo:'Girilmedi (demo)',catH:'Katalog bilgileri',imgH:'Görüntü bilgileri',viewer:'Yazma görüntüleyici',userRec:'Yönetici kaydı',upNote:'Kullanıcı tarafından yüklenen görsel; kalıcı depolama yoktur, sayfa yenilenince kaybolur.',sea:['Karadeniz','Marmara Denizi','Ege Denizi'],mapTag:'Yalnızca doğrulanmış kütüphane konumları',libsIn:'Kütüphaneler',allReg:'Tüm bölge',rec:'kayıt',seeRec:'Kayıtları gör',
+featT:'Öne çıkan kütüphaneler',featN:'Katalogda yayımlanmış kütüphaneler ve bunlara bağlı nüshalar.',
+worksT:'Yazma eser keşfi',worksN:'Arayüz dilini değiştirmeden eser diline göre süzebilirsiniz.',statsT:'Marmara Bölgesi · Coğrafi istatistikler',statsN:'Yalnızca telif tarihi açıkça 1512–1520 aralığında olan, Marmara Bölgesi’ndeki yayımlanmış nüshalar sayılır. Tarihi belirsiz veya dönem dışındaki kayıtlar dahil edilmez.',statsEmpty:'Şu anda telif tarihi 1512–1520 aralığında olduğu açıkça anlaşılan yayımlanmış nüsha yok. Tarihi belirsiz veya bu aralığın dışındaki kayıtlar sayımlara dahil edilmez.',cityDistribution:'İllere göre yazma nüsha dağılımı',compareT:'Aynı eserin nüshalarını karşılaştır',compareN:'1512–1520 arasında telif edilmiş bir eserin iki veya daha fazla yayımlanmış fiziksel nüshasını yan yana inceleyin.',comparePick:'Karşılaştırılacak eser',compareNone:'Karşılaştırma için aynı esere ait en az iki yayımlanmış fiziksel nüsha gerekir. Şu anda bu koşulu karşılayan kayıt yok.',openCopy:'Nüsha ayrıntısını aç',copies:'Nüsha',libraries:'Kütüphane',manuscripts:'Yazma nüsha',worksCount:'Farklı eser',copyDate:'İstinsah tarihi',shelfmark:'Katalog numarası',verification:'Doğrulama',confidence:'Güven düzeyi',collection:'Koleksiyon',wl:'Eser dili',all:'Tümü',
+langN:{tr:'Türkçe',ar:'Arapça',fa:'Farsça'},none:'Sonuç yok. Aramayı kısaltın veya filtreleri temizleyin.',noData:'Henüz yayımlanmış katalog kaydı bulunmuyor.',loading:'Katalog verileri yükleniyor…',loadError:'Katalog verileri yüklenemedi:',clear:'Filtreleri temizle',shown:'kayıt gösteriliyor',
+f:{orig:'Özgün ad',tl:'Latin harfli ad',au:'Müellif',ty:'Eser türü',wl:'Eser dili',co:'Telif tarihi',cp:'İstinsah tarihi (bu nüsha)',li:'Kütüphane',cl:'Koleksiyon',no:'Katalog no.',fo:'Varak sayısı',ve:'Kaynak ve doğrulama',ep:'İstinsah yeri',dl:'Dijital görüntü',sc:'Tam kaynak künyesi',vs:'Doğrulama durumu',cf:'Güven düzeyi',cn:'Bu eserin kayıtlı nüsha sayısı',nt:'Not'},
+types:{poetry:'Manzum eser',prose:'Mensur eser',history:'Tarih'},
+v:{range:'1512–1520 aralığı (demo)',later:'Sonraki yüzyıl; kesin değil (demo)',unk:'Bilinmiyor',ver:'Doğrulanmadı; demo verisi',fol:'Tespit edilmedi',ep:'Bilinmiyor (demo)',nolink:'Bağlantı tespit edilmedi',ln:'Örnek bağlantı (demo)',sc:'[Demo künye] Soyadı, Adı. Başlık. Yayın yeri: Yayınevi, yıl, sayfa. Gerçek kaynak değildir.',draft:'Taslak',unv:'Doğrulanmadı',conf:'Kaynaklar çelişiyor',none:'Belirlenmedi',ok:'Doğrulandı',high:'Yüksek',low:'Düşük',mid:'Orta',cfn:'Demo not: kaynaklar arasında istinsah bilgisi uyuşmuyor. Çelişki gizlenmez, burada not edilir.'},
+badge:'DEMO',lib:'Demo Kütüphane',coll:'Demo Koleksiyon',au:'Demo Müellif',tlp:'[Demo adı',
+abT:'Amaç ve yöntem',ab1:'Platform, Marmara Bölgesi kütüphanelerindeki yazma nüshaları kataloglar, harita üzerinde gösterir ve araştırmacıların dijital ortamda keşfetmesini sağlar.',
+d1:'Telif tarihi',d1t:'Eserin yazıldığı dönem; bu projede 1512–1520.',d2:'İstinsah tarihi',d2t:'Bugün kütüphanede duran fiziksel nüshanın çoğaltıldığı tarih.',
+ab2:'Her fiziksel nüsha ayrı bir katalog kaydıdır. 1512–1520 arasında telif edilmiş bir eserin sonraki yüzyıllardaki nüshaları da kapsama girer. Kayıtlar araştırma sürecinde elle girilecek ve kaynağıyla doğrulanacaktır; belirsiz bilgiler kesin gösterilmeyecektir.',
+srcT:'Kaynakça',srcP:'Henüz kaynak eklenmedi. Doğrulanmış kataloglar ve fihristler eklendikçe burada listelenecek.',
+ctT:'İletişim',ctP:'Katkı, düzeltme ve iş birliği mesajlarınızı aşağıdaki formdan iletebilirsiniz.',ctB:'E-posta ile gönder',
+foot:'© 2026 Osmanlı Edebiyatının Dijital Hafızası'},
+ar:{brand:'الذاكرة الرقمية للأدب العثماني',short:'الذاكرة الرقمية',nav:['المكتبات','الخريطة','المخطوطات','الإحصاءات','مقارنة النسخ','المنهج','تواصل'],
+demoBar:'الفهرس المباشر: تُحمّل السجلات المنشورة من قاعدة البيانات، ويظل الفهرس فارغًا إذا لم توجد سجلات.',
+lead:'أطلس رقمي يفهرس النسخ المخطوطة للأعمال الأدبية التي أُلّفت بين عامي 1512 و1520 في مكتبات منطقة مرمرة، ويعرضها على الخريطة، ويتيحها للباحثين.',
+ph:'ابحث عن عمل أو مؤلف أو مكتبة أو رقم الفهرس',go:'بحث',
+mapT:'منطقة مرمرة',mapN:'تظهر فقط المكتبات التي تأكد موقعها في ولايات منطقة مرمرة الإحدى عشرة. لا تظهر السجلات الواقعة خارج المنطقة على خريطة المشروع.',
+pick:'اختر مدينة من الخريطة.',cityF:'المدينة',open:'التفاصيل والصور الرقمية',close:'إغلاق',prev:'الصورة السابقة',next:'الصورة التالية',zin:'تكبير',zout:'تصغير',fit:'ملاءمة',fsB:'ملء الشاشة',fsX:'إنهاء ملء الشاشة',thumbs:'معاينات الصفحات',strip:'شريط',grid:'شبكة',imgOf:'الصورة',folio:'الورقة',front:'الوجه',back:'الظهر',missMsg:'هذه الورقة غير موجودة أو تعذّر عرضها؛ سُجّلت ناقصة ولم يُنشأ بديل عنها.',miss:'ورقة ناقصة',noImg:'لم تُضف صور رقمية لهذه النسخة بعد.',demoImg:'عنصر نائب تجريبي (DEMO): ليس صورة مخطوطة حقيقية.',iDesc:'وصف الصورة',iSrc:'مصدر الصورة',iUrl:'الملف أو الرابط',iRt:'حقوق النشر والاستخدام',iRtDemo:'لم تُدخل (تجريبي)',catH:'بيانات الفهرسة',imgH:'بيانات الصورة',viewer:'عارض المخطوطة',userRec:'سجل المشرف',upNote:'صورة رفعها المستخدم؛ لا يوجد تخزين دائم وستختفي عند تحديث الصفحة.',sea:['البحر الأسود','بحر مرمرة','بحر إيجه'],mapTag:'مواقع المكتبات التي تم التحقق منها فقط',libsIn:'المكتبات',allReg:'كل المنطقة',rec:'سجل',seeRec:'عرض السجلات',
+featT:'مكتبات مميزة',featN:'المكتبات المنشورة في الفهرس والنسخ المرتبطة بها.',
+worksT:'استكشاف المخطوطات',worksN:'يمكنك التصفية حسب لغة العمل دون تغيير لغة الواجهة.',statsT:'منطقة مرمرة · الإحصاءات الجغرافية',statsN:'تُحتسب فقط النسخ المنشورة في مرمرة التي يقع تاريخ تأليف أعمالها بوضوح بين 1512 و1520؛ ولا تُحتسب التواريخ غير الواضحة أو خارج هذه الفترة.',statsEmpty:'لا توجد حالياً نسخة منشورة ثبت بوضوح أن تاريخ تأليف عملها يقع بين 1512 و1520. لا تدخل التواريخ غير الواضحة أو خارج الفترة في الإحصاءات.',cityDistribution:'توزيع النسخ المخطوطة حسب المدن',compareT:'مقارنة نسخ العمل نفسه',compareN:'قارن جنباً إلى جنب نسختين ماديتين منشورتين أو أكثر لعمل أُلّف بين 1512 و1520.',comparePick:'العمل المراد مقارنته',compareNone:'تتطلب المقارنة نسختين ماديتين منشورتين على الأقل للعمل نفسه. لا توجد حالياً سجلات تستوفي هذا الشرط.',openCopy:'فتح تفاصيل النسخة',copies:'نسخة',libraries:'مكتبة',manuscripts:'نسخة مخطوطة',worksCount:'أعمال مختلفة',copyDate:'تاريخ الاستنساخ',shelfmark:'رقم الفهرس',verification:'التحقق',confidence:'مستوى الثقة',collection:'المجموعة',wl:'لغة العمل',all:'الكل',
+langN:{tr:'التركية',ar:'العربية',fa:'الفارسية'},none:'لا توجد نتائج. اختصر البحث أو امسح عوامل التصفية.',noData:'لا توجد سجلات فهرسة منشورة حتى الآن.',loading:'جارٍ تحميل بيانات الفهرس…',loadError:'تعذّر تحميل بيانات الفهرس:',clear:'مسح عوامل التصفية',shown:'سجلات معروضة',
+f:{orig:'الاسم الأصلي',tl:'الاسم بالحروف اللاتينية',au:'المؤلف',ty:'نوع العمل',wl:'لغة العمل',co:'تاريخ التأليف',cp:'تاريخ النسخ (هذه النسخة)',li:'المكتبة',cl:'المجموعة',no:'رقم الفهرس',fo:'عدد الأوراق',ve:'المصدر والتوثيق',ep:'مكان النسخ',dl:'الصورة الرقمية',sc:'بيانات المصدر الكاملة',vs:'حالة التوثيق',cf:'درجة الثقة',cn:'عدد النسخ المسجّلة لهذا العمل',nt:'ملاحظة'},
+types:{poetry:'عمل منظوم',prose:'عمل منثور',history:'تاريخ'},
+v:{range:'ضمن 1512–1520 (تجريبي)',later:'قرن لاحق؛ غير مؤكد (تجريبي)',unk:'غير معروف',ver:'غير موثّق؛ بيانات تجريبية',fol:'لم يُحدَّد',ep:'غير معروف (تجريبي)',nolink:'لم يُحدَّد رابط',ln:'رابط تجريبي (مثال)',sc:'[بيانات تجريبية] اللقب، الاسم. العنوان. مكان النشر: الناشر، السنة، الصفحات. ليس مصدراً حقيقياً.',draft:'مسودة',unv:'غير موثّق',conf:'المصادر متعارضة',none:'غير محددة',ok:'موثّق',high:'مرتفعة',low:'منخفضة',mid:'متوسطة',cfn:'ملاحظة تجريبية: معلومات تاريخ النسخ متعارضة بين المصادر. لا يُخفى التعارض بل يُدوَّن هنا.'},
+badge:'تجريبي · DEMO',lib:'مكتبة تجريبية',coll:'مجموعة تجريبية',au:'مؤلف تجريبي',tlp:'[اسم تجريبي',
+abT:'الهدف والمنهج',ab1:'تفهرس المنصة النسخ المخطوطة في مكتبات منطقة مرمرة، وتعرضها على الخريطة، وتتيح للباحثين استكشافها رقمياً.',
+d1:'تاريخ التأليف',d1t:'زمن تأليف العمل؛ في هذا المشروع بين 1512 و1520.',d2:'تاريخ النسخ',d2t:'تاريخ استنساخ النسخة المادية الموجودة اليوم في المكتبة.',
+ab2:'كل نسخة مادية سجل فهرسة مستقل. وتدخل في النطاق أيضاً نسخ القرون اللاحقة للأعمال المؤلَّفة بين 1512 و1520. ستُدخل السجلات يدوياً أثناء البحث وتُوثَّق بمصادرها، ولن تُعرض المعلومات غير المؤكدة على أنها يقين.',
+srcT:'المصادر',srcP:'لم تُضف مصادر بعد. ستُدرج هنا الفهارس والكتالوجات الموثقة عند إضافتها.',
+ctT:'تواصل',ctP:'يمكنكم إرسال المساهمات والتصحيحات ورسائل التعاون عبر النموذج أدناه.',ctB:'إرسال بالبريد الإلكتروني',
+foot:'© 2026 الذاكرة الرقمية للأدب العثماني'},
+fa:{brand:'حافظهٔ دیجیتال ادبیات عثمانی',short:'حافظهٔ دیجیتال',nav:['کتابخانه‌ها','نقشه','نسخه‌های خطی','آمار','مقایسه نسخه‌ها','روش','تماس'],
+demoBar:'فهرست زنده: رکوردهای منتشرشده از پایگاه داده بارگیری می‌شوند؛ اگر هنوز رکوردی نباشد، فهرست خالی نمایش داده می‌شود.',
+lead:'اطلسی دیجیتال که نسخه‌های خطی آثار ادبی تألیف‌شده میان سال‌های ۱۵۱۲ تا ۱۵۲۰ را در کتابخانه‌های منطقهٔ مرمره فهرست می‌کند، روی نقشه نشان می‌دهد و برای پژوهشگران در دسترس می‌گذارد.',
+ph:'جستجوی اثر، مؤلف، کتابخانه یا شمارهٔ فهرست',go:'جستجو',
+mapT:'منطقهٔ مرمره',mapN:'فقط کتابخانه‌هایی نمایش داده می‌شوند که مکانشان در یازده استان منطقهٔ مرمره تأیید شده باشد. رکوردهای خارج از این منطقه در نقشهٔ پروژه نمی‌آیند.',
+pick:'یک شهر را روی نقشه انتخاب کنید.',cityF:'شهر',open:'جزئیات و تصاویر دیجیتال',close:'بستن',prev:'تصویر قبلی',next:'تصویر بعدی',zin:'بزرگ‌نمایی',zout:'کوچک‌نمایی',fit:'متناسب',fsB:'تمام‌صفحه',fsX:'خروج از تمام‌صفحه',thumbs:'پیش‌نمایش صفحه‌ها',strip:'نوار',grid:'جدول',imgOf:'تصویر',folio:'برگ',front:'رو',back:'پشت',missMsg:'این برگ موجود نیست یا نمایش داده نمی‌شود؛ ناقص ثبت شده و تصویری جایگزین آن ساخته نشده است.',miss:'برگ ناقص',noImg:'برای این نسخه هنوز تصویر دیجیتال افزوده نشده است.',demoImg:'جانشین نمایشی (DEMO): تصویر واقعی نسخهٔ خطی نیست.',iDesc:'توضیح تصویر',iSrc:'منبع تصویر',iUrl:'پرونده یا پیوند',iRt:'حق نشر و شرایط استفاده',iRtDemo:'وارد نشده (نمونه)',catH:'اطلاعات فهرست',imgH:'اطلاعات تصویر',viewer:'نمایشگر نسخهٔ خطی',userRec:'رکورد مدیر',upNote:'تصویر بارگذاری‌شده توسط کاربر؛ ذخیرهٔ دائمی وجود ندارد و با نوسازی صفحه از بین می‌رود.',sea:['دریای سیاه','دریای مرمره','دریای اژه'],mapTag:'فقط مکان کتابخانه‌های تأییدشده',libsIn:'کتابخانه‌ها',allReg:'کل منطقه',rec:'رکورد',seeRec:'دیدن رکوردها',
+featT:'کتابخانه‌های برگزیده',featN:'کتابخانه‌های ثبت‌شده در پایگاه داده و نسخه‌های مرتبط با آن‌ها.',
+worksT:'کاوش نسخه‌های خطی',worksN:'بدون تغییر زبان رابط می‌توانید بر اساس زبان اثر پالایش کنید.',statsT:'منطقهٔ مرمره · آمار جغرافیایی',statsN:'فقط نسخه‌های منتشرشده در مرمره شمرده می‌شوند که تاریخ تألیف اثرشان به‌روشنی بین ۱۵۱۲ تا ۱۵۲۰ باشد؛ تاریخ‌های نامشخص یا خارج از این دوره محاسبه نمی‌شوند.',statsEmpty:'در حال حاضر نسخهٔ منتشرشده‌ای با تاریخ تألیفِ روشن در بازهٔ ۱۵۱۲ تا ۱۵۲۰ وجود ندارد. تاریخ‌های نامشخص یا خارج از این بازه در آمار وارد نمی‌شوند.',cityDistribution:'توزیع نسخه‌های خطی بر اساس شهر',compareT:'مقایسه نسخه‌های یک اثر',compareN:'دو یا چند نسخهٔ فیزیکی منتشرشده از اثری تألیف‌شده در سال‌های ۱۵۱۲ تا ۱۵۲۰ را کنار هم بررسی کنید.',comparePick:'اثر برای مقایسه',compareNone:'برای مقایسه دست‌کم دو نسخهٔ فیزیکی منتشرشده از یک اثر لازم است. در حال حاضر رکوردی این شرط را ندارد.',openCopy:'گشودن جزئیات نسخه',copies:'نسخه',libraries:'کتابخانه',manuscripts:'نسخهٔ خطی',worksCount:'آثار متفاوت',copyDate:'تاریخ استنساخ',shelfmark:'شمارهٔ فهرست',verification:'اعتبارسنجی',confidence:'سطح اطمینان',collection:'مجموعه',wl:'زبان اثر',all:'همه',
+langN:{tr:'ترکی',ar:'عربی',fa:'فارسی'},none:'نتیجه‌ای نیست. جستجو را کوتاه کنید یا پالایه‌ها را پاک کنید.',noData:'هنوز هیچ رکورد فهرست‌شدهٔ منتشرشده‌ای وجود ندارد.',loading:'داده‌های فهرست در حال بارگیری…',loadError:'بارگیری داده‌های فهرست ناموفق بود:',clear:'پاک کردن پالایه‌ها',shown:'رکورد نمایش داده می‌شود',
+f:{orig:'عنوان اصلی',tl:'عنوان لاتین',au:'مؤلف',ty:'نوع اثر',wl:'زبان اثر',co:'تاریخ تألیف',cp:'تاریخ استنساخ (این نسخه)',li:'کتابخانه',cl:'مجموعه',no:'شمارهٔ فهرست',fo:'شمار برگ‌ها',ve:'منبع و اعتبارسنجی',ep:'محل استنساخ',dl:'تصویر دیجیتال',sc:'مشخصات کامل منبع',vs:'وضعیت اعتبارسنجی',cf:'سطح اطمینان',cn:'شمار نسخه‌های ثبت‌شدهٔ این اثر',nt:'یادداشت'},
+types:{poetry:'اثر منظوم',prose:'اثر منثور',history:'تاریخ'},
+v:{range:'در بازهٔ ۱۵۱۲–۱۵۲۰ (نمونه)',later:'سدهٔ بعد؛ نامطمئن (نمونه)',unk:'نامعلوم',ver:'اعتبارسنجی نشده؛ داده‌ی نمایشی',fol:'شناسایی نشد',ep:'نامشخص (نمونه)',nolink:'پیوندی شناسایی نشد',ln:'پیوند نمونه (آزمایشی)',sc:'[مشخصات نمونه] نام خانوادگی، نام. عنوان. محل نشر: ناشر، سال، صفحه. منبع واقعی نیست.',draft:'پیش‌نویس',unv:'اعتبارسنجی نشده',conf:'منابع ناهمخوان‌اند',none:'تعیین نشده',ok:'اعتبارسنجی شد',high:'بالا',low:'پایین',mid:'متوسط',cfn:'یادداشت نمونه: اطلاعات استنساخ در منابع ناهمخوان است. ناهمخوانی پنهان نمی‌شود و اینجا ثبت می‌گردد.'},
+badge:'نمایشی · DEMO',lib:'کتابخانهٔ نمونه',coll:'مجموعهٔ نمونه',au:'مؤلف نمونه',tlp:'[عنوان نمونه',
+abT:'هدف و روش',ab1:'این پلتفرم نسخه‌های خطی کتابخانه‌های منطقهٔ مرمره را فهرست می‌کند، روی نقشه نشان می‌دهد و کاوش دیجیتال پژوهشگران را ممکن می‌سازد.',
+d1:'تاریخ تألیف',d1t:'زمان نگارش اثر؛ در این پروژه میان ۱۵۱۲ تا ۱۵۲۰.',d2:'تاریخ استنساخ',d2t:'تاریخ استنساخ نسخهٔ فیزیکی که امروز در کتابخانه است.',
+ab2:'هر نسخهٔ فیزیکی یک رکورد فهرست جداگانه است. نسخه‌های سده‌های بعد از آثار تألیف‌شده در ۱۵۱۲–۱۵۲۰ نیز در دامنهٔ پژوهش‌اند. رکوردها در روند پژوهش به‌صورت دستی وارد و با منبع تأیید می‌شوند و اطلاعات نامطمئن قطعی نشان داده نمی‌شود.',
+srcT:'کتابشناسی',srcP:'هنوز منبعی افزوده نشده است. فهرست‌ها و کاتالوگ‌های تأییدشده پس از افزودن اینجا می‌آیند.',
+ctT:'تماس',ctP:'پیام‌های همکاری، اصلاح و مشارکت را از طریق فرم زیر ارسال کنید.',ctB:'ارسال با ایمیل',
+foot:'© 2026 حافظهٔ دیجیتال ادبیات عثمانی'}
+};
+const LANGS=[['tr','Türkçe'],['ar','العربية'],['fa','فارسی']];
+
+/* ---------- DEMO verisi (gerçek kayıt değildir) ---------- */
+const CITIES=[
+{id:'ist',x:328,y:109,n:{tr:'İstanbul',ar:'إسطنبول',fa:'استانبول'}},
+{id:'bur',x:336,y:191,n:{tr:'Bursa',ar:'بورصة',fa:'بورسا'}},
+{id:'edi',x:86,y:42,n:{tr:'Edirne',ar:'أدرنة',fa:'ادرنه'}},
+{id:'can',x:71,y:195,n:{tr:'Çanakkale',ar:'جناق قلعة',fa:'چناق‌قلعه'}},
+{id:'kir',x:0,y:0,n:{tr:'Kırklareli',ar:'قرقلرایلی',fa:'قرقلرایلی'}},
+{id:'tek',x:0,y:0,n:{tr:'Tekirdağ',ar:'تكيرداغ',fa:'تکیرداغ'}},
+{id:'koc',x:0,y:0,n:{tr:'Kocaeli',ar:'قوجاایلی',fa:'قوجاایلی'}},
+{id:'sak',x:0,y:0,n:{tr:'Sakarya',ar:'ساکاریا',fa:'ساکاریا'}},
+{id:'yal',x:0,y:0,n:{tr:'Yalova',ar:'یالوا',fa:'یالوا'}},
+{id:'bal',x:0,y:0,n:{tr:'Balıkesir',ar:'بالیکسیر',fa:'بالیکسیر'}},
+{id:'bil',x:0,y:0,n:{tr:'Bilecik',ar:'بیله‌جیک',fa:'بیله‌جیک'}}];
+let LIBS=[];
+/* id = fiziksel nüsha kaydı; wk = eser kimliği (aynı wk altında birden çok bağımsız nüsha kaydı olabilir) */
+let WORKS=[];
+let IMAGES={};
+const ORIG={tr:'نمونه اثر آدی',ar:'عنوان تجريبي',fa:'عنوان نمونه'};
+const libOf=id=>LIBS.find(l=>String(l.id)===String(id))||{id,name:'Kütüphane bilgisi henüz eklenmemiş',c:'unknown',k:''};
+const cityOf=id=>CITIES.find(c=>c.id===id)||{id:'unknown',n:{tr:'Konumu belirtilmemiş',ar:'الموقع غير محدد',fa:'مکان مشخص نشده'}};
+const cat=w=>w.custom?(w.catNo||'—'):'DEMO-'+String(w.id).padStart(3,'0');
+const LN=(l,T)=>l.name||T.lib+' '+l.k;
+const PUB=()=>WORKS.filter(w=>w.status==='published');
+const origOf=w=>w.custom?(w.orig||'—'):w.lang.map(x=>ORIG[x]).join(' / ');
+const tlOf=(w,T)=>w.custom?(w.tl||T.v.fol):T.tlp+' '+w.wk+']';
+const auOf=(w,T)=>w.custom?(w.au||T.v.fol):T.au+' '+w.a;
+const typeOf=(w,T)=>w.custom&&w.type==='other'?(w.typeTxt||T.v.fol):T.types[w.type];
+const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f\u064B-\u065F]/g,'').replace(/ı/g,'i').replace(/ي/g,'ی').replace(/ك/g,'ک');
+const isWithinProjectPeriod=value=>{
+  const latin=String(value||'').replace(/[۰-۹٠-٩]/g,ch=>{const n=ch.charCodeAt(0);return String(n>=0x06F0&&n<=0x06F9?n-0x06F0:n-0x0660);});
+  const years=(latin.match(/\d{4}/g)||[]).map(Number).filter(y=>y>=1000&&y<=2999);
+  return years.length>0&&years.every(y=>y>=1512&&y<=1520);
+};
+
+function Star(){return h('svg',{width:26,height:26,viewBox:'0 0 32 32','aria-hidden':true},h('g',{fill:'none',stroke:'#D2AE5B',strokeWidth:1.6},h('rect',{x:7,y:7,width:18,height:18}),h('rect',{x:7,y:7,width:18,height:18,transform:'rotate(45 16 16)'})))}
+
+function Fields({w,T,lang}){
+  const l=libOf(w.lib),F=T.f,row=(k,v)=>h('div',{key:k},h('dt',null,F[k]),h('dd',null,v));
+  return h('dl',null,
+      row('au',auOf(w,T)),row('wl',w.lang.map(x=>T.langN[x]).join(' + ')),row('ty',typeOf(w,T)),
+      h('div',{key:'dates',className:'dates'},h('div',null,h('dt',null,F.co),h('dd',null,w.custom?(w.coT||T.v.fol):T.v.range)),h('div',null,h('dt',null,F.cp),h('dd',null,w.custom?(w.cpT||T.v.fol):T.v[w.cp])),h('div',null,h('dt',null,F.ep),h('dd',null,w.custom?(w.epT||T.v.fol):T.v.ep))),
+      row('li',LN(l,T)+' · '+cityOf(l.c).n[lang]),row('cl',w.custom?(w.clT||T.v.fol):T.coll+' '+l.k),row('no',cat(w)),
+      row('fo',w.custom?(w.fo||T.v.fol):T.v.fol),row('cn',PUB().filter(x=>x.wk===w.wk).length),
+      row('dl',w.url&&(!w.custom||/^https?:\/\//i.test(w.url))?h('a',{href:w.url,target:'_blank',rel:'noopener noreferrer',onClick:e=>e.stopPropagation()},w.custom?w.url:T.v.ln):T.v.nolink),
+      h('div',{key:'ve',className:'ver'},h('dt',null,F.vs),h('dd',null,h('span',{className:'badge'},T.v[w.vs]))),
+      row('cf',T.v[w.cf]),
+      h('div',{key:'sc',className:'ver'},h('dt',null,F.sc),h('dd',{dir:'auto'},w.custom?(w.sc||T.v.fol):T.v.sc)),
+      (w.custom?!!w.note:w.vs==='conf')&&h('div',{key:'nt',className:'ver'},h('dt',null,F.nt),h('dd',{dir:'auto'},w.custom?w.note:T.v.cfn)));
+}
+
+/* Sayfa görüntüsü: gerçek url varsa <img>, yoksa DEMO yer tutucu; eksik varak için taralı alan (görüntü üretilmez) */
+function Page({w,im,T}){
+  const lab=im.folio+im.side,box={width:'100%',height:'100%',display:'block'};
+  if(im.url&&!im.missing)return h('img',{src:im.url,alt:cat(w)+' '+lab,style:{...box,objectFit:'contain'}});
+  if(im.missing)return h('svg',{viewBox:'0 0 300 400',role:'img','aria-label':T.miss+' '+lab,style:box},
+    h('defs',null,h('pattern',{id:'hx',width:12,height:12,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},h('line',{x1:0,y1:0,x2:0,y2:12,stroke:'#8A6A22',strokeWidth:2,opacity:.5}))),
+    h('rect',{width:300,height:400,fill:'url(#hx)'}),h('rect',{x:1.5,y:1.5,width:297,height:397,fill:'none',stroke:'#8A6A22',strokeWidth:3,strokeDasharray:'8 6'}),
+    h('rect',{x:40,y:160,width:220,height:84,fill:'#F1E7CE'}),
+    h('text',{x:150,y:198,textAnchor:'middle',fontSize:26,fontWeight:700,fill:'#6D1F2B'},T.miss),h('text',{x:150,y:230,textAnchor:'middle',fontSize:24,fill:'#14203F'},lab));
+  return h('svg',{viewBox:'0 0 300 400',role:'img','aria-label':'Görüntü dosyası henüz bağlanmadı: '+lab,style:box},
+    h('rect',{width:300,height:400,fill:'#EBDDB9'}),
+    h('rect',{x:16,y:16,width:268,height:368,fill:'none',stroke:'#B8923F',strokeWidth:3}),
+    h('text',{x:150,y:185,textAnchor:'middle',fontSize:19,fontWeight:700,fill:'#6D1F2B'},'Görüntü mevcut değil'),
+    h('text',{x:150,y:220,textAnchor:'middle',fontSize:22,fill:'#14203F'},lab));
+}
+
+/* Sağdan açılan ayrıntı paneli: görüntüleyici + küçük önizlemeler + katalog bilgileri (aynı nüsha kaydına bağlı) */
+function Drawer({w,T,lang,onClose}){
+  const imgs=IMAGES[w.id]||[],n=imgs.length,rtl=lang!=='tr',l=libOf(w.lib);
+  const [i,setI]=useState(0),[z,setZ]=useState(1),[fs,setFs]=useState(false),[grid,setGrid]=useState(false);
+  const vref=useRef(null),cref=useRef(null),sref=useRef(null),aref=useRef(null);
+  const im=imgs[i];
+  const go=d=>{setI(x=>Math.min(n-1,Math.max(0,x+d)));setZ(1);};
+  const zoom=d=>setZ(v=>Math.min(4,Math.max(1,+(v+d).toFixed(2))));
+  const exitFs=()=>{document.fullscreenElement&&document.exitFullscreen&&document.exitFullscreen();setFs(false);};
+  const toggleFs=()=>{if(fs){exitFs();}else{setFs(true);const e=vref.current;e&&e.requestFullscreen&&e.requestFullscreen().catch(()=>{});}};
+  useEffect(()=>{const prev=document.activeElement;cref.current&&cref.current.focus();document.body.style.overflow='hidden';
+    const f=()=>{if(!document.fullscreenElement)setFs(false);};document.addEventListener('fullscreenchange',f);
+    return()=>{document.body.style.overflow='';document.removeEventListener('fullscreenchange',f);prev&&prev.focus&&prev.focus();};},[]);
+  useEffect(()=>{const k=e=>{
+    if(e.key==='Escape'){fs?exitFs():onClose();}
+    else if(n&&e.key==='ArrowRight')go(rtl?-1:1);else if(n&&e.key==='ArrowLeft')go(rtl?1:-1);
+    else if(n&&(e.key==='+'||e.key==='='))zoom(.5);else if(n&&e.key==='-')zoom(-.5);};
+    window.addEventListener('keydown',k);return()=>window.removeEventListener('keydown',k);});
+  useEffect(()=>{const st=sref.current,el=aref.current;if(st&&el){const a=el.getBoundingClientRect(),b=st.getBoundingClientRect();
+    if(grid)st.scrollTop+=a.top-b.top-(b.height-a.height)/2;else st.scrollLeft+=a.left-b.left-(b.width-a.width)/2;}},[i,grid]);
+  const dv=(v,d)=>!v?T.v.fol:v==='demo'?d:v;
+  const side=im?(im.side==='a'?T.front:im.side==='b'?T.back:im.side==='single'?'tek sayfa':'yüz bilinmiyor')+' ('+im.side+')':'';
+  const irow=(k,v)=>h('div',{key:k},h('dt',null,k),h('dd',null,v));
+  const viewer=!n?null:h('section',{ref:vref,className:'vw'+(fs?' fs':''),'aria-label':T.viewer},
+    h('div',{className:'tb'},
+      h('button',{className:'tbn',onClick:()=>go(-1),disabled:i===0,'aria-label':T.prev},rtl?'›':'‹'),
+      h('span',{className:'pos','aria-live':'polite'},T.imgOf+' '+(i+1)+' / '+n+' · '+T.folio+' '+im.folio+im.side),
+      h('button',{className:'tbn',onClick:()=>go(1),disabled:i===n-1,'aria-label':T.next},rtl?'‹':'›'),
+      h('span',{className:'sp'}),
+      h('button',{className:'tbn',onClick:()=>zoom(-.5),disabled:z<=1,'aria-label':T.zout},'−'),
+      h('span',{className:'zl'},Math.round(z*100)+'%'),
+      h('button',{className:'tbn',onClick:()=>zoom(.5),disabled:z>=4,'aria-label':T.zin},'+'),
+      h('button',{className:'tbn',onClick:()=>setZ(1)},T.fit),
+      h('button',{className:'tbn',onClick:toggleFs},fs?T.fsX:T.fsB)),
+    h('div',{className:'stage',tabIndex:0},h('div',{className:'pg',style:{height:z*100+'%'}},h(Page,{w,im,T}))),
+    im.missing?h('p',{className:'miss',role:'status'},T.missMsg):(im.up?h('p',{className:'dn'},T.upNote):!im.url&&h('p',{className:'dn'},T.demoImg)),
+    h('div',{className:'ths'},h('span',null,T.thumbs+' ('+n+')'),h('button',{className:'tbn',onClick:()=>setGrid(!grid)},grid?T.strip:T.grid)),
+    h('div',{ref:sref,className:grid?'tgrid':'strip',role:'list'},imgs.map((m,j)=>h('button',{key:j,role:'listitem',ref:j===i?aref:null,className:'th','aria-current':j===i,'aria-label':T.folio+' '+m.folio+m.side+(m.missing?' ('+T.miss+')':''),onClick:()=>{setI(j);setZ(1);}},
+      h('div',{className:'tp'},h(Page,{w,im:m,T})),h('span',null,m.folio+m.side)))));
+  return h('div',{className:'ov',onClick:onClose},
+    h('aside',{className:'dw',role:'dialog','aria-modal':true,'aria-label':T.open,onClick:e=>e.stopPropagation()},
+      h('div',{className:'dwh'},h('span',null,h('span',{className:'badge'},w.db?'Katalog kaydı':T.userRec),' ',h('strong',null,LN(l,T)+' · '+cat(w))),h('button',{ref:cref,className:'btn',onClick:onClose},T.close)),
+      h('div',{className:'dwb'},
+        h('div',{className:'vcol'},n?viewer:h('div',{className:'noimg',role:'status'},T.noImg)),
+        h('div',{className:'icol'},
+          n>0&&h('div',{className:'ms dwi'},h('h3',null,T.imgH+' · '+im.folio+im.side),
+            h('dl',null,irow(T.imgOf,(i+1)+' / '+n),irow(T.folio,im.folio+im.side+' · '+side),
+              irow(T.iDesc,im.missing?T.missMsg:dv(im.desc,T.demoImg)),irow(T.iSrc,dv(im.src,T.demoImg)),
+              irow(T.iUrl,im.link&&/^https?:\/\//i.test(im.link)?h('a',{href:im.link,target:'_blank',rel:'noopener noreferrer'},im.link):T.v.nolink),irow(T.iRt,dv(im.rights||(w.custom&&w.rg)||'',T.iRtDemo)))),
+          h('div',{className:'ms dwi'},h('h3',null,T.catH),
+            h('div',{className:'nm'},h('div',{className:'lb'},T.f.orig),h('p',{className:'orig',dir:w.custom?'auto':'rtl',lang:w.lang[0]==='tr'?'ota':w.lang[0]},origOf(w))),
+            h('div',{className:'nm'},h('div',{className:'lb'},T.f.tl),h('div',{className:'tl',dir:'ltr'},tlOf(w,T))),
+            h(Fields,{w,T,lang}))))));
+}
+
+function Card({w,T,lang,onOpen}){
+  const F=T.f;
+  return h('article',{className:'ms ms-open',onClick:()=>onOpen(w)},
+    h('div',{className:'top'},h('span',{className:'badge'},w.db?'Katalog kaydı':T.userRec),h('span',{className:'dim'},w.lang.map(x=>T.langN[x]).join(' + '))),
+    h('div',{className:'nm'},h('div',{className:'lb'},F.orig),h('p',{className:'orig',dir:w.custom?'auto':'rtl',lang:w.lang[0]==='tr'?'ota':w.lang[0]},origOf(w))),
+    h('div',{className:'nm'},h('div',{className:'lb'},F.tl),h('div',{className:'tl',dir:'ltr'},tlOf(w,T))),
+    h(Fields,{w,T,lang}),
+    h('button',{className:'btn open',onClick:e=>{e.stopPropagation();onOpen(w)}},T.open+' ('+(IMAGES[w.id]||[]).length+')'));
+}
+
+/* ======= YÖNETİM ALANI: Supabase Auth, veritabanı ve Storage ile kalıcı yönetim. ======= */
+let UID=100;
+const ST={draft:'Taslak',ready:'Yayımlanmaya hazır',published:'Yayımlanmış'};
+const BLANK=()=>({orig:'',tl:'',altTitles:'',workDesc:'',au:'',type:'poetry',typeTxt:'',lang:[],coT:'',cpT:'',scribe:'',epT:'',city:'',cityNew:'',libT:'',clT:'',catNo:'',fo:'',sc:'',sources:[],url:'',rg:'',vs:'unv',cf:'none',note:'',wk:''});
+const KEYS=Object.keys(BLANK()).filter(k=>k!=='city'&&k!=='cityNew');
+const imgsOf=id=>IMAGES[id]||[];
+const missingFor=f=>{const m=[];if(!(f.orig||'').trim())m.push('özgün eser adı');if(!f.lang.length)m.push('eser dili');if(!(f.city&&(f.city!=='__new'||f.cityNew.trim())))m.push('şehir');if(!(f.libT||'').trim())m.push('kütüphane');if(!(f.sc||'').trim())m.push('kaynak künyesi');return m;};
+const tryStatus=(r,to)=>{
+  if(to!=='draft'&&r.custom){const l=r.lib&&libOf(r.lib),need=missingFor({...r,city:l?l.c:'',libT:l?l.name:'',cityNew:''});if(need.length)return 'Eksik alan: '+need.join(', ')+'. Önce doldurup kaydedin.';}
+  if(to==='published'&&r.custom&&r.status!=='ready')return 'Önce “Yayımlanmaya hazır” olarak işaretleyin.';
+  r.status=to;return '';};
+const sbadge=s=>h('span',{className:'badge',style:{background:s==='published'?'#2F6B3F':s==='ready'?'#8A6A22':'#6D1F2B'}},ST[s]);
+
+// Supabase kalıcı katalog işlemleri: eser, nüsha, yazar ve kütüphane.
+const dbCityId=v=>{const x=String(v||'').toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(x.includes('istanbul'))return 'ist';if(x.includes('bursa'))return 'bur';if(x.includes('edirne'))return 'edi';if(x.includes('canakkale'))return 'can';if(x.includes('kirklareli'))return 'kir';if(x.includes('tekirdag'))return 'tek';if(x.includes('kocaeli'))return 'koc';if(x.includes('sakarya')||x.includes('adapazari'))return 'sak';if(x.includes('yalova'))return 'yal';if(x.includes('balikesir'))return 'bal';if(x.includes('bilecik'))return 'bil';return 'unknown';};
+const isMarmaraCity=v=>dbCityId(v)!=='unknown';
+const isMarmaraCoordinate=(lat,lng)=>Number.isFinite(lat)&&Number.isFinite(lng)&&lat>=39.0&&lat<=42.5&&lng>=25.5&&lng<=31.5;
+async function persistManuscript(rec,f,cid,targetStatus){
+  const sb=window.supabaseClient;
+  if(!sb)throw new Error('Supabase bağlantısı bulunamadı.');
+  let libraryId=rec._libraryDbId||null;
+  const libName=(f.libT||'').trim();
+  if((libName||cid)&&!CITIES.some(c=>c.id===cid))throw new Error('Bu proje yalnızca Marmara Bölgesi’nin 11 ilindeki kütüphaneleri kapsar. Lütfen Marmara Bölgesi’nden bir şehir seçin.');
+  if(libName){
+    if(libraryId){
+      const {error}=await sb.from('libraries').update({name:libName,city:cityOf(cid).n.tr,country:'Türkiye'}).eq('id',libraryId);
+      if(error)throw error;
+    }else{
+      let q=await sb.from('libraries').select('id').eq('name',libName).eq('city',cityOf(cid).n.tr).limit(1);
+      if(q.error)throw q.error;
+      libraryId=q.data&&q.data[0]?q.data[0].id:null;
+      if(!libraryId){const {data,error}=await sb.from('libraries').insert({name:libName,city:cityOf(cid).n.tr,country:'Türkiye'}).select('id').single();if(error)throw error;libraryId=data.id;}
+    }
+  }
+  let workId=rec._workId||null;
+  const peer=WORKS.find(x=>x.custom&&x.id!==rec.id&&f.wk&&String(x.wk)===String(f.wk));
+  if(peer&&peer._workId)workId=peer._workId;
+  const genre=f.type==='other'?(f.typeTxt||'other'):f.type;
+  const workRow={title_original:(f.orig||'').trim(),title_transliteration:(f.tl||'').trim()||null,alternative_titles:(f.altTitles||'').trim()||null,genre:genre||null,language:(f.lang||[]).join(',')||null,composition_date_text:(f.coT||'').trim()||null,description:(f.workDesc||'').trim()||null};
+  if(!workRow.title_original)throw new Error('Özgün eser adı zorunludur.');
+  if(workId){if(targetStatus==='published')workRow.is_published=true;const {error}=await sb.from('works').update(workRow).eq('id',workId);if(error)throw error;}
+  else{workRow.is_published=targetStatus==='published';const {data,error}=await sb.from('works').insert(workRow).select('id').single();if(error)throw error;workId=data.id;}
+  // Müellif ilişkileri salt kaydetme sırasında topluca silinmez; mevcut ortak yazar bağlantıları korunur.
+  const authorName=(f.au||'').trim();
+  if(authorName){
+    let aq=await sb.from('authors').select('id').eq('name_transliteration',authorName).limit(1);
+    if(aq.error)throw aq.error;
+    let authorId=aq.data&&aq.data[0]?aq.data[0].id:null;
+    if(!authorId){const {data,error}=await sb.from('authors').insert({name_original:authorName,name_transliteration:authorName}).select('id').single();if(error)throw error;authorId=data.id;}
+    const existingLinks=await sb.from('work_authors').select('author_id').eq('work_id',workId);
+    if(existingLinks.error)throw existingLinks.error;
+    if(!(existingLinks.data||[]).some(x=>String(x.author_id)===String(authorId))){const {error}=await sb.from('work_authors').insert({work_id:workId,author_id:authorId});if(error)throw error;}
+  }
+  const manuscriptRow={work_id:workId,library_id:libraryId,collection_name:(f.clT||'').trim()||null,shelfmark:(f.catNo||'').trim()||null,copy_date_text:(f.cpT||'').trim()||null,scribe_name:(f.scribe||'').trim()||null,copy_place:(f.epT||'').trim()||null,folio_count:f.fo===''||f.fo==null?null:Number.parseInt(f.fo,10),verification_status:f.vs==='ok'?'verified':f.vs==='conf'?'disputed':'unverified',confidence_level:f.cf==='mid'?'medium':(['low','high'].includes(f.cf)?f.cf:null),verification_notes:(f.note||'').trim()||null,description:(f.sc||'').trim()||null,is_published:targetStatus==='published'};
+  if(manuscriptRow.folio_count!==null&&!Number.isFinite(manuscriptRow.folio_count))throw new Error('Varak sayısı tam sayı olmalıdır.');
+  let manuscriptId=rec._dbId||null;
+  if(manuscriptId){const {error}=await sb.from('manuscripts').update(manuscriptRow).eq('id',manuscriptId);if(error)throw error;}
+  else{const {data,error}=await sb.from('manuscripts').insert(manuscriptRow).select('id').single();if(error)throw error;manuscriptId=data.id;}
+  // Yapılandırılmış kaynaklar: mevcut kayıtlar güncellenir; yalnızca panelde açıkça silinenler silinir.
+  for(const src of (f.sources||[])){
+    const hasContent=['source_type','title','author_or_institution','publication_details','page_reference','url','access_date','notes'].some(k=>String(src[k]||'').trim());
+    if(src._delete&&src.id){const {error}=await sb.from('catalog_sources').delete().eq('id',src.id);if(error)throw error;continue;}
+    if(!hasContent)continue;
+    const sourceRow={source_type:(src.source_type||'catalogue').trim()||'catalogue',title:(src.title||'').trim()||null,author_or_institution:(src.author_or_institution||'').trim()||null,publication_details:(src.publication_details||'').trim()||null,page_reference:(src.page_reference||'').trim()||null,url:(src.url||'').trim()||null,access_date:src.access_date||null,notes:(src.notes||'').trim()||null,work_id:src.scope==='work'?workId:null,manuscript_id:src.scope==='manuscript'?manuscriptId:null};
+    if(src.id){const {error}=await sb.from('catalog_sources').update(sourceRow).eq('id',src.id);if(error)throw error;}
+    else{const {data,error}=await sb.from('catalog_sources').insert(sourceRow).select('id').single();if(error)throw error;src.id=data.id;}
+  }
+  rec._dbId=manuscriptId;rec._workId=workId;rec._libraryDbId=libraryId;rec._persisted=true;
+  rec.lib=libraryId?('db:'+libraryId):null;
+  if(libraryId){let lb=LIBS.find(x=>String(x.dbId||x.id)===String(libraryId));if(!lb){lb={id:'db:'+libraryId,dbId:libraryId,c:cid,name:libName,k:0,custom:true};LIBS.push(lb);}else{lb.name=libName;lb.c=cid;}}
+  rec.status=targetStatus==='published'?'published':(targetStatus==='ready'?'ready':'draft');
+  rec.wk=workId;Object.keys(BLANK()).forEach(k=>{if(k in f)rec[k]=f[k];});
+  rec.city=cid;rec.libT=libName;rec.sc=f.sc||'';rec.url=f.url||'';rec.rg=f.rg||'';rec.altTitles=f.altTitles||'';rec.workDesc=f.workDesc||'';rec.scribe=f.scribe||'';rec.sources=f.sources||[];
+  return rec;
+}
+
+function Fld({label,w,hint,children}){return h('label',{className:'fld'+(w?' w':'')},h('span',null,label),children,hint&&h('small',{className:'dn'},hint));}
+
+const readImg=f=>new Promise(res=>{const r=new FileReader();r.onerror=()=>res(null);r.onload=()=>{const src=r.result,im=new Image();im.onerror=()=>res(src);im.onload=()=>{try{const M=2000,sc=Math.min(1,M/Math.max(im.naturalWidth,im.naturalHeight));if(sc>=1&&f.size<1500000)return res(src);const c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*sc);c.height=Math.round(im.naturalHeight*sc);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.88));}catch(e){res(src);}};im.src=src;};r.readAsDataURL(f);});
+function ImageManager({rec,bump}){
+  const [note,setNote]=useState(''),[ask,setAsk]=useState(null),[busy,setBusy]=useState(false);
+  const arr=imgsOf(rec.id);
+  const sb=window.supabaseClient;
+  const bucket='manuscript-images';
+  const renum=a=>a.forEach((m,i)=>{m.seq=i+1;});
+  const put=a=>{renum(a);IMAGES[rec.id]=a;bump();};
+  const nextPos=a=>{const t=a[a.length-1];if(!t)return{folio:'1',side:'a'};return t.side==='a'?{folio:t.folio,side:'b'}:{folio:String((parseInt(t.folio,10)||0)+1),side:'a'};};
+  const RIGHTS=[['unknown','Belirsiz (izin tespit edilmedi)',false],['pending','İzin bekleniyor',false],['restricted','Kısıtlı / yalnızca kurum içi',false],['public_domain','Kamu malı',true],['permission_granted','Yayın izni alındı',true],['open_license','Açık lisans',true]];
+  const rightsAllowed=code=>!!RIGHTS.find(x=>x[0]===code)?.[2];
+  const mk=(a,p)=>({id:'tmp-'+Date.now()+'-'+Math.random().toString(36).slice(2),...nextPos(a),desc:'',src:'',url:'',rights:'',rightsStatus:'unknown',link:'',missing:false,up:false,name:'',isPublic:false,...p});
+  const signedUrl=async path=>{
+    if(!path)return '';
+    const {data,error}=await sb.storage.from(bucket).createSignedUrl(path,3600);
+    if(error)throw error;
+    return data.signedUrl;
+  };
+  const safeName=name=>String(name||'image').normalize('NFKD').replace(/[^a-zA-Z0-9._-]+/g,'_').slice(-100)||'image';
+  const uploadFile=async file=>{
+    if(!rec._dbId)throw new Error('Önce eser/nüsha kaydını Kaydet düğmesiyle veritabanına kaydedin.');
+    if(file.size>20*1024*1024)throw new Error('Dosya 20 MB sınırını aşıyor.');
+    const path=rec._dbId+'/'+Date.now()+'-'+safeName(file.name);
+    const {error}=await sb.storage.from(bucket).upload(path,file,{cacheControl:'3600',contentType:file.type,upsert:false});
+    if(error)throw error;
+    return path;
+  };
+  const insertMeta=async(m,path)=>{
+    const row={manuscript_id:rec._dbId,storage_path:path||null,file_name:m.name||null,folio_label:String(m.folio||''),page_number:Number.parseInt(m.folio,10)||null,side:m.side||'unknown',display_order:Math.max(0,...imgsOf(rec.id).map(x=>Number(x.seq)||0))+1,image_source:m.src||null,rights_status:m.rightsStatus||'unknown',usage_notes:m.rights||null,mime_type:m.mime||null,is_public:!!m.isPublic&&!!path&&!m.missing&&rightsAllowed(m.rightsStatus),is_missing:!!m.missing,description:m.desc||null};
+    const {data,error}=await sb.from('manuscript_images').insert(row).select('*').single();
+    if(error)throw error;
+    return data;
+  };
+  const persistOrder=async a=>{
+    for(let k=0;k<a.length;k++){const {error}=await sb.from('manuscript_images').update({display_order:-(k+1)}).eq('id',a[k].id);if(error)throw error;}
+    for(let k=0;k<a.length;k++){const {error}=await sb.from('manuscript_images').update({display_order:k+1}).eq('id',a[k].id);if(error)throw error;}
+  };
+  const add=async files=>{
+    const list=files.filter(f=>['image/jpeg','image/png','image/webp'].includes(f.type)),skip=files.length-list.length;
+    if(!list.length){setNote('Görsel dosyası seçilmedi.');return;}
+    if(!rec._dbId){setNote('Önce eser/nüsha kaydını Kaydet düğmesiyle veritabanına kaydedin.');return;}
+    setBusy(true);setNote('Görseller Supabase Storage’a yükleniyor…');
+    let ok=0;
+    try{
+      for(const file of list){
+        const path=await uploadFile(file);
+        try{
+          const draft=mk(imgsOf(rec.id),{name:file.name,mime:file.type,up:true,missing:false});
+          const row=await insertMeta(draft,path);
+          let url='',urlWarning='';
+          try{url=await signedUrl(path);}catch(e){urlWarning=e.message||String(e);}
+          const saved={...draft,id:row.id,storagePath:path,url,up:false,missing:false,seq:Number(row.display_order)||imgsOf(rec.id).length+1};
+          put([...imgsOf(rec.id),saved]);ok++;
+          if(urlWarning)setNote('Görsel ve katalog kaydı kaydedildi; yönetici önizleme bağlantısı üretilemedi: '+urlWarning);
+        }catch(e){await sb.storage.from(bucket).remove([path]);throw e;}
+      }
+      setNote(ok+' görsel kalıcı olarak yüklendi.'+(skip?'; '+skip+' dosya görsel olmadığı için atlandı':'')+' Varak ve yüz bilgilerini düzenleyip “Bilgileri kaydet” düğmesine basın.');
+    }catch(e){setNote('Yükleme hatası: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const upd=(i,p)=>put(imgsOf(rec.id).map((m,j)=>j===i?{...m,...p}:m));
+  const saveMeta=async i=>{
+    const m=imgsOf(rec.id)[i];if(!m||!m.id||String(m.id).startsWith('tmp-'))return;
+    setBusy(true);setNote('');
+    try{
+      if(m.isPublic&&(!rightsAllowed(m.rightsStatus)||!m.storagePath||m.missing)){setNote('Ziyaretçiye açmak için geçerli bir görsel dosyası ve doğrulanmış yayın hakkı gerekir.');return;}
+      const row={folio_label:String(m.folio||''),page_number:Number.parseInt(m.folio,10)||null,side:m.side||'unknown',image_source:m.src||null,rights_status:m.rightsStatus||'unknown',usage_notes:m.rights||null,description:m.desc||null,is_public:!!m.isPublic&&rightsAllowed(m.rightsStatus)&&!m.missing,display_order:i+1};
+      const {error}=await sb.from('manuscript_images').update(row).eq('id',m.id);
+      if(error)throw error;
+      setNote('Görsel bilgileri veritabanına kaydedildi.');
+    }catch(e){setNote('Bilgi kaydedilemedi: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const mv=async(i,d)=>{
+    const a=[...imgsOf(rec.id)],j=i+d;if(j<0||j>=a.length)return;
+    [a[i],a[j]]=[a[j],a[i]];renum(a);put(a);
+    if(a.some(m=>!m.id||String(m.id).startsWith('tmp-')))return;
+    setBusy(true);
+    try{
+      await persistOrder(a);
+      setNote('Görsel sıralaması kalıcı olarak kaydedildi.');
+    }catch(e){setNote('Sıralama kaydedilemedi: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const del=async i=>{
+    const m=imgsOf(rec.id)[i];if(!m)return;
+    setBusy(true);
+    try{
+      if(m.id&&!String(m.id).startsWith('tmp-')){const {error}=await sb.from('manuscript_images').delete().eq('id',m.id);if(error)throw error;}
+      if(m.storagePath){const {error}=await sb.storage.from(bucket).remove([m.storagePath]);if(error)throw error;}
+      const remaining=imgsOf(rec.id).filter((_,j)=>j!==i);put(remaining);
+      if(remaining.length)await persistOrder(remaining);
+      setAsk(null);setNote('Görsel ve katalog kaydı silindi.');
+    }catch(e){setNote('Silme işlemi başarısız: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const addMissing=async()=>{
+    if(!rec._dbId){setNote('Önce eser/nüsha kaydını kaydedin.');return;}
+    setBusy(true);
+    try{
+      const draft=mk(imgsOf(rec.id),{missing:true});
+      const row=await insertMeta(draft,null);
+      put([...imgsOf(rec.id),{...draft,id:row.id,seq:Number(row.display_order)||imgsOf(rec.id).length+1}]);
+      setNote('Eksik varak kaydı veritabanına eklendi.');
+    }catch(e){setNote('Eksik varak kaydedilemedi: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const replace=async(i,file)=>{
+    const old=imgsOf(rec.id)[i];if(!old)return;
+    setBusy(true);setNote('Yeni görsel yükleniyor…');
+    try{
+      const path=await uploadFile(file);
+      const {error}=await sb.from('manuscript_images').update({storage_path:path,file_name:file.name,mime_type:file.type,is_missing:false,is_public:false,rights_status:'unknown'}).eq('id',old.id);
+      if(error){await sb.storage.from(bucket).remove([path]);throw error;}
+      let url='',urlWarning='';
+      try{url=await signedUrl(path);}catch(e){urlWarning=e.message||String(e);}
+      if(old.storagePath){const {error:removeError}=await sb.storage.from(bucket).remove([old.storagePath]);if(removeError)setNote('Yeni görsel kaydedildi; eski dosya depodan kaldırılamadı: '+removeError.message);}
+      upd(i,{storagePath:path,url,name:file.name,mime:file.type,missing:false,up:false,isPublic:false,rightsStatus:'unknown'});
+      setNote(urlWarning?'Yeni görsel kaydedildi; eski yayın izni güvenlik için sıfırlandı. Önizleme bağlantısı üretilemedi: '+urlWarning:'Görsel yenisiyle değiştirildi. Önceki yayın izni güvenlik için sıfırlandı; yeni dosyanın hakkını doğrulayıp ayrıca kaydedin.');
+    }catch(e){setNote('Görsel değiştirilemedi: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const markMissing=async i=>{
+    const m=imgsOf(rec.id)[i];if(!m||m.missing)return;
+    setBusy(true);
+    try{
+      const {error}=await sb.from('manuscript_images').update({storage_path:null,is_missing:true,is_public:false}).eq('id',m.id);
+      if(error)throw error;
+      if(m.storagePath)await sb.storage.from(bucket).remove([m.storagePath]);
+      upd(i,{storagePath:null,url:'',missing:true,isPublic:false});
+      setNote('Varak eksik olarak kaydedildi; dosya depodan kaldırıldı.');
+    }catch(e){setNote('Eksik varak durumu kaydedilemedi: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const inp=(i,k,lab,p)=>h(Fld,{label:lab},h('input',{value:arr[i][k]||'',disabled:busy,onChange:e=>upd(i,{[k]:e.target.value}),...p}));
+  return h('div',null,
+    !rec._dbId&&h('div',{className:'warn',role:'alert'},'Görsel yüklemeden önce eser/nüsha kaydını Kaydet düğmesiyle Supabase’e kaydedin.'),
+    h('div',{className:'okb',role:'note'},'Görseller Supabase Storage’da saklanır; katalog bilgileri manuscript_images tablosuna yazılır. Ziyaretçilere açmak için görselin kullanım hakkını kontrol edip “Ziyaretçiye açık” seçeneğini ayrıca işaretleyin.'),
+    h('div',{className:'btns'},
+      h('label',{className:'abtn p',style:busy?{opacity:.5,pointerEvents:'none'}:null},'Görsel seç (birden fazla)',h('input',{className:'vh',type:'file',accept:'image/jpeg,image/png,image/webp',multiple:true,disabled:busy||!rec._dbId,onChange:e=>{add(Array.from(e.target.files));e.target.value='';}})),
+      h('button',{className:'abtn',disabled:busy||!rec._dbId,onClick:addMissing},'Eksik varak ekle')),
+    note&&h('div',{className:note.toLowerCase().includes('hata')||note.toLowerCase().includes('kaydedilemedi')?'warn':'okb',role:'status'},note),
+    h('p',{className:'dim'},'Toplam '+arr.length+' görüntü. Sıra, listedeki sıradır; ↑ ↓ ile değiştirilir. Yüklenen dosyalar en fazla 20 MB olabilir.'),
+    !arr.length&&h('div',{className:'noimg'},'Bu nüsha için henüz dijital görüntü eklenmemiştir.'),
+    arr.map((m,i)=>h('div',{key:m.id,className:'icard'},
+      h('div',null,h('div',{className:'ithumb'},m.url&&!m.missing?h('img',{src:m.url,alt:m.folio+m.side}):h(Page,{w:rec,im:m,T:L.tr})),h('div',{className:'dn'},'Sıra '+(i+1)+' / '+arr.length+(m.storagePath?' · Supabase’de kayıtlı':'')),h('div',{className:'dn','aria-live':'polite',style:{fontWeight:600,color:m.missing||!m.storagePath||!rightsAllowed(m.rightsStatus)||!m.isPublic?'#8A5A18':'#2F6B3F'}},m.missing?'Ziyaretçiye gösterilmez: eksik varak':!m.storagePath?'Ziyaretçiye gösterilmez: dosya yok':!rightsAllowed(m.rightsStatus)?'Ziyaretçiye kapalı: yayın hakkı doğrulanmamış':!m.isPublic?'Hak durumu uygun; “Ziyaretçiye açık” seçeneği kapalı':'Ziyaretçiye açık · ayar kaydedildi')),
+      h('div',null,
+        h('div',{className:'fgrid'},inp(i,'folio','Varak no (1, 2, 3…)'),
+          h(Fld,{label:'Yüz'},h('select',{value:m.side||'a',disabled:busy,onChange:e=>upd(i,{side:e.target.value})},h('option',{value:'a'},'Ön yüz (a)'),h('option',{value:'b'},'Arka yüz (b)'),h('option',{value:'single'},'Tek sayfa'),h('option',{value:'unknown'},'Bilinmiyor'))),
+          inp(i,'desc','Görsel açıklaması'),inp(i,'src','Görsel kaynağı'),
+          h(Fld,{label:'Hak durumu',hint:'Yalnızca gerçek izin veya lisans belgesine göre seçim yapın.'},h('select',{value:m.rightsStatus||'unknown',disabled:busy,onChange:e=>upd(i,{rightsStatus:e.target.value,isPublic:rightsAllowed(e.target.value)?!!m.isPublic:false})},RIGHTS.map(([v,l])=>h('option',{key:v,value:v},l)))),
+          inp(i,'rights','Kullanım ve telif notu'),
+          inp(i,'link','Dijital bağlantı (isteğe bağlı)',{placeholder:'https://…'})),
+        h('label',{className:'chk'},h('input',{type:'checkbox',checked:!!m.isPublic,disabled:busy||m.missing||!rightsAllowed(m.rightsStatus),onChange:e=>upd(i,{isPublic:e.target.checked})}),'Ziyaretçiye açık (kullanım hakkı doğrulandı)'),
+        h('div',{className:'btns'},
+          h('button',{className:'abtn',disabled:busy||i===0,onClick:()=>mv(i,-1),'aria-label':'Yukarı taşı'},'↑'),
+          h('button',{className:'abtn',disabled:busy||i===arr.length-1,onClick:()=>mv(i,1),'aria-label':'Aşağı taşı'},'↓'),
+          h('button',{className:'abtn p',disabled:busy||m.missing,onClick:()=>saveMeta(i)},'Bilgileri kaydet'),
+          h('label',{className:'abtn'},m.url?'Görseli değiştir':'Görsel ata',h('input',{className:'vh',type:'file',accept:'image/jpeg,image/png,image/webp',disabled:busy||!rec._dbId,onChange:e=>{const f=e.target.files[0];e.target.value='';if(f&&f.type.startsWith('image/'))replace(i,f);}})),
+          m.missing?h('span',{className:'badge'},'Eksik varak'):
+            h('button',{className:'abtn',disabled:busy,onClick:()=>markMissing(i)},'Eksik olarak işaretle'),
+          ask===m.id?h(React.Fragment,null,h('button',{className:'abtn d',disabled:busy,onClick:()=>del(i)},'Evet, sil'),h('button',{className:'abtn',onClick:()=>setAsk(null)},'Vazgeç')):h('button',{className:'abtn d',disabled:busy,onClick:()=>setAsk(m.id)},'Sil'))))));
+}
+function Editor({rec,bump,onBack,preview}){
+  const l0=rec.lib&&libOf(rec.lib);
+  const [f,setF]=useState(()=>({...BLANK(),...rec,sources:Array.isArray(rec.sources)?rec.sources:[],city:l0?l0.c:'',libT:l0?l0.name:'',cityNew:''})),[msg,setMsg]=useState('');
+  const set=(k,v)=>setF(x=>({...x,[k]:v}));
+  const inp=(k,p)=>h('input',{value:f[k],onChange:e=>set(k,e.target.value),...p});
+  const ta=k=>h('textarea',{value:f[k],dir:'auto',onChange:e=>set(k,e.target.value)});
+  const sel=(k,o,v,fn)=>h('select',{value:v===undefined?f[k]:v,onChange:e=>fn?fn(e.target.value):set(k,e.target.value)},o.map(([a,b],i)=>h('option',{key:i,value:a},b)));
+  const tog=x=>set('lang',f.lang.includes(x)?f.lang.filter(y=>y!==x):[...f.lang,x]);
+  const own='u'+rec.id;
+  const [saving,setSaving]=useState(false);
+  const save=async target=>{
+    const to=target||rec.status;
+    const need=to==='draft'?[]:missingFor(f);
+    if(need.length){setMsg('warn:Eksik alan: '+need.join(', ')+'. Önce doldurun veya kaydı taslakta tutun.');return false;}
+    const cid=f.city;
+    if(!cid&&f.libT.trim()){setMsg('warn:Kütüphane kaydetmek için Marmara Bölgesi’ndeki 11 ilden birini seçin.');return false;}
+    if(cid&&!CITIES.some(c=>c.id===cid)){setMsg('warn:Bu proje yalnızca Marmara Bölgesi’ndeki 11 ili kapsar.');return false;}
+    setSaving(true);setMsg('');
+    try{await persistManuscript(rec,{...f},cid,to);setF(x=>({...x,city:cid,cityNew:''}));bump();setMsg('ok:Veritabanına kalıcı olarak kaydedildi.');return true;}
+    catch(e){setMsg('warn:Kayıt yapılamadı: '+(e.message||String(e)));return false;}
+    finally{setSaving(false);}
+  };
+  const go=async to=>{if(!await save(to))return;setMsg('ok:Durum veritabanına kaydedildi: '+ST[to]+'.');};
+  const others=WORKS.filter(o=>o.custom&&o.id!==rec.id);
+  return h('div',null,
+    h('h2',{dir:'auto'},rec.orig||'(Adsız taslak)'),
+    h('p',{className:'dim'},'Kayıt no '+rec.id+' · Durum: ',sbadge(rec.status)),
+    msg&&h('div',{className:msg.startsWith('ok:')?'okb':'warn',role:'status'},msg.slice(msg.indexOf(':')+1)),
+    h('div',{className:'fgrid'},
+      h(Fld,{label:'Özgün eser adı (orijinal yazı sistemiyle)',w:true},inp('orig',{dir:'auto',lang:'ota'})),
+      h(Fld,{label:'Latin harfli aktarım'},inp('tl')),h(Fld,{label:'Alternatif eser adları',w:true,hint:'Birden fazla ad varsa noktalı virgülle veya satır satır ayırabilirsiniz.'},ta('altTitles')),
+      h(Fld,{label:'Müellif'},inp('au')),
+      h(Fld,{label:'Eserin kısa açıklaması',w:true},ta('workDesc')),
+      h(Fld,{label:'Eser türü'},sel('type',[['poetry','Manzum eser'],['prose','Mensur eser'],['history','Tarih'],['other','Diğer (yaz)']])),
+      f.type==='other'&&h(Fld,{label:'Eser türü (yazın)'},inp('typeTxt')),
+      h('div',{className:'fld w'},h('span',null,'Eser dili (birden fazla seçilebilir)'),[['tr','Türkçe'],['ar','Arapça'],['fa','Farsça']].map(([x,n])=>h('label',{key:x,className:'chk'},h('input',{type:'checkbox',checked:f.lang.includes(x),onChange:()=>tog(x)}),n))),
+      h(Fld,{label:'Telif tarihi (eserin yazıldığı dönem)',hint:'Boş bırakılırsa ziyaretçiye “Tespit edilmedi” gösterilir.'},inp('coT')),
+      h(Fld,{label:'İstinsah tarihi (bu fiziksel nüsha)',hint:'Telif tarihinden ayrı alandır. Bilinmiyorsa tahmin yazmayın.'},inp('cpT')),
+      h(Fld,{label:'Müstensih (bu nüshayı çoğaltan kişi)'},inp('scribe')),
+      h(Fld,{label:'İstinsah yeri (biliniyorsa)'},inp('epT')),
+      h(Fld,{label:'Şehir (yalnızca Marmara Bölgesi)',hint:'Proje kapsamındaki 11 ilden birini seçin.'},sel('city',[['','Seçin'],...CITIES.map(c=>[c.id,c.n.tr])])),
+      h(Fld,{label:'Bulunduğu kütüphane'},inp('libT')),h(Fld,{label:'Koleksiyon'},inp('clT')),
+      h(Fld,{label:'Katalog numarası'},inp('catNo')),h(Fld,{label:'Varak sayısı'},inp('fo')),
+      h(Fld,{label:'Mevcut kaynak / bibliyografik not (eski kayıt alanı)',w:true,hint:'Önceden girilmiş bu bilgi korunur. Yeni kaynakları aşağıdaki ayrı kaynak kayıtlarına ekleyin.'},ta('sc')),
+      h('div',{className:'fld w'},h('span',null,'Kaynak kayıtları (birden fazla kaynak ekleyebilirsiniz)'),
+        (f.sources||[]).filter(x=>!x._delete).map((src,i)=>h('div',{key:src.id||('new-'+i),className:'panel',style:{marginTop:10}},
+          h('div',{className:'fgrid'},
+            h(Fld,{label:'Kaynağın türü'},h('input',{value:src.source_type||'',placeholder:'Katalog, makale, kitap…',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,source_type:e.target.value}:x))})),
+            h(Fld,{label:'Kaynak başlığı'},h('input',{value:src.title||'',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,title:e.target.value}:x))})),
+            h(Fld,{label:'Yazar / kurum'},h('input',{value:src.author_or_institution||'',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,author_or_institution:e.target.value}:x))})),
+            h(Fld,{label:'Yayın bilgileri'},h('input',{value:src.publication_details||'',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,publication_details:e.target.value}:x))})),
+            h(Fld,{label:'Sayfa / katalog bölümü'},h('input',{value:src.page_reference||'',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,page_reference:e.target.value}:x))})),
+            h(Fld,{label:'Kaynak bağlantısı'},h('input',{value:src.url||'',placeholder:'https://…',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,url:e.target.value}:x))})),
+            h(Fld,{label:'Erişim tarihi'},h('input',{type:'date',value:src.access_date||'',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,access_date:e.target.value}:x))})),
+            h(Fld,{label:'Kaynak hangi kayda ait?'},h('select',{value:src.scope||'manuscript',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,scope:e.target.value}:x))},h('option',{value:'manuscript'},'Bu fiziksel nüsha'),h('option',{value:'work'},'Eserin geneli'))),
+            h(Fld,{label:'Not',w:true},h('textarea',{value:src.notes||'',onChange:e=>set('sources',f.sources.map((x,j)=>j===i?{...x,notes:e.target.value}:x))}))),
+          h('button',{type:'button',className:'abtn d',onClick:()=>set('sources',f.sources.map((x,j)=>j===i?{...x,_delete:true}:x))},'Bu kaynak kaydını kaldır'))),
+        h('button',{type:'button',className:'abtn',style:{marginTop:10},onClick:()=>set('sources',[...(f.sources||[]),{source_type:'catalogue',title:'',author_or_institution:'',publication_details:'',page_reference:'',url:'',access_date:'',notes:'',scope:'manuscript'}])},'+ Kaynak ekle')),
+      h(Fld,{label:'Dijital bağlantı (kayıt düzeyi, isteğe bağlı)',hint:'http:// veya https:// ile başlamalı.'},inp('url',{placeholder:'https://…'})),
+      h(Fld,{label:'Doğrulama durumu'},sel('vs',[['unv','Doğrulanmadı'],['conf','Kaynaklar çelişiyor'],['ok','Doğrulandı']])),
+      h(Fld,{label:'Güven düzeyi'},sel('cf',[['none','Belirlenmedi'],['low','Düşük'],['mid','Orta'],['high','Yüksek']])),
+      h(Fld,{label:'Görsel kullanım ve telif bilgisi (genel)',w:true,hint:'Görsele özel bilgi girilmemişse ziyaretçi görüntüleyicisinde bu gösterilir.'},ta('rg')),
+      h(Fld,{label:'Doğrulama / belirsizlik notu',w:true},ta('note')),
+      h(Fld,{label:'Aynı eserin başka bir nüshası mı?',hint:'Seçilirse iki kayıt aynı eser sayılır ama iki ayrı fiziksel nüsha olarak kalır.'},
+        sel('wk',[['','Hayır, bağımsız eser'],...others.map(o=>[o.wk,(o.orig||'(Adsız)')+' · '+cat(o)])],f.wk===own||!f.wk?'':f.wk,v=>set('wk',v||own)))),
+    h('div',{className:'btns'},
+      h('button',{className:'abtn p',disabled:saving,onClick:()=>save()},saving?'Kaydediliyor…':'Kaydet'),
+      rec.status==='draft'&&h('button',{className:'abtn',disabled:saving,onClick:()=>go('ready')},'Yayımlanmaya hazır olarak işaretle'),
+      rec.status==='ready'&&h('button',{className:'abtn p',disabled:saving,onClick:()=>go('published')},'Yayımla'),
+      rec.status!=='draft'&&h('button',{className:'abtn',disabled:saving,onClick:()=>go('draft')},rec.status==='published'?'Yayından kaldır (taslağa al)':'Taslağa al'),
+      h('button',{className:'abtn',onClick:()=>{if(!rec.lib){setMsg('warn:Önizleme için önce şehir ve kütüphaneyi girip Kaydet’e basın.');return;}preview(rec.id);}},'Ziyaretçi görünümünde önizle'),
+      h('button',{className:'abtn',onClick:onBack},'Listeye dön')),
+    h('h2',{style:{marginTop:28}},'Görseller'),
+    h(ImageManager,{rec,bump}));
+}
+
+function Admin({bump,goSite,start}){
+  const [dbBusy,setDbBusy]=useState(true);
+  const [tab,setTab]=useState(start||'home'),[flt,setFlt]=useState('all'),[eid,setEid]=useState(null),[pv,setPv]=useState(null),[ask,setAsk]=useState(null),[msg,setMsg]=useState('');
+  useEffect(()=>{window.onbeforeunload=WORKS.some(w=>w.custom&&!w._persisted)?e=>{e.preventDefault();e.returnValue='';}:null;return()=>{window.onbeforeunload=null;};});
+  useEffect(()=>{let alive=true;(async()=>{try{
+    const sb=window.supabaseClient;
+    // KALICI VERİ KURALI: Yönetim panelinin ilk yüklemesi salt-okunurdur.
+    // Mevcut kayıtları dönüştürme; görsel hak/yayın alanlarını yalnızca kullanıcının açık kaydetme işlemi değiştirebilir.
+    const [wr,mr,ar,lar,war,ir,sr]=await Promise.all([sb.from('works').select('*'),sb.from('manuscripts').select('*'),sb.from('authors').select('*'),sb.from('libraries').select('*'),sb.from('work_authors').select('*'),sb.from('manuscript_images').select('*').order('display_order',{ascending:true}),sb.from('catalog_sources').select('*').order('created_at',{ascending:true})]);
+    for(const r of [wr,mr,ar,lar,war,ir,sr])if(r.error)throw r.error;
+    if(!alive)return;
+    const authorsById=new Map((ar.data||[]).map(a=>[a.id,a]));
+    const authorByWork=new Map();(war.data||[]).forEach(x=>{const a=authorsById.get(x.author_id);if(a)authorByWork.set(x.work_id,a);});
+    LIBS=(lar.data||[]).map(l=>({id:'db:'+l.id,dbId:l.id,c:dbCityId(l.city),name:l.name,k:0,custom:true}));
+    const worksById=new Map((wr.data||[]).map(w=>[w.id,w]));
+    const rows=(mr.data||[]).map((m,i)=>{const w=worksById.get(m.work_id)||{},a=authorByWork.get(m.work_id)||{};return {id:++UID,_dbId:m.id,_workId:m.work_id,_libraryDbId:m.library_id||null,_persisted:true,custom:true,db:true,status:m.is_published&&w.is_published?'published':'draft',orig:w.title_original||'',tl:w.title_transliteration||'',altTitles:w.alternative_titles||'',workDesc:w.description||'',au:a.name_transliteration||a.name_original||'',lang:String(w.language||'').split(/[,+;|]/).filter(Boolean).map(x=>({turkish:'tr','türkçe':'tr',tr:'tr',arabic:'ar','عربية':'ar',ar:'ar',persian:'fa','فارسی':'fa',fa:'fa'}[x.trim().toLowerCase()]||null)).filter(Boolean),type:['poetry','prose','history'].includes(w.genre)?w.genre:'other',typeTxt:w.genre||'',coT:w.composition_date_text||'',cpT:m.copy_date_text||'',scribe:m.scribe_name||'',epT:m.copy_place||'',city:dbCityId((lar.data||[]).find(l=>l.id===m.library_id)?.city),lib:'db:'+String(m.library_id||''),libT:(lar.data||[]).find(l=>l.id===m.library_id)?.name||'',clT:m.collection_name||'',catNo:m.shelfmark||'',fo:m.folio_count==null?'':String(m.folio_count),vs:m.verification_status==='verified'?'ok':m.verification_status==='disputed'?'conf':'unv',cf:m.confidence_level==='medium'?'mid':(m.confidence_level||'none'),note:m.verification_notes||'',sc:m.description||'',url:'',rg:'',wk:m.work_id};});
+    const sourceRows=sr.data||[];
+    rows.forEach(rec=>{rec.sources=sourceRows.filter(src=>(src.manuscript_id&&String(src.manuscript_id)===String(rec._dbId))||(src.work_id&&String(src.work_id)===String(rec._workId))).map(src=>({...src,scope:src.manuscript_id&&String(src.manuscript_id)===String(rec._dbId)?'manuscript':'work'}));});
+    IMAGES={};
+    for(const im of (ir.data||[])){
+      const rec=rows.find(x=>String(x._dbId)===String(im.manuscript_id));
+      if(!rec)continue;
+      let url='';
+      if(im.storage_path&&!im.is_missing){
+        const {data,error}=await sb.storage.from('manuscript-images').createSignedUrl(im.storage_path,3600);
+        if(!error&&data)url=data.signedUrl;
+      }
+      (IMAGES[rec.id]||(IMAGES[rec.id]=[])).push({
+        id:im.id,seq:Number(im.display_order)||1,folio:String(im.folio_label||im.page_number||'?').replace(/[ab]$/i,''),
+        side:['a','b','single','unknown'].includes(im.side)?im.side:'unknown',
+        desc:im.description||'',src:im.image_source||'',url,link:'',rights:im.usage_notes||'',rightsStatus:im.rights_status||'unknown',
+        missing:!!im.is_missing,up:false,name:im.file_name||'',mime:im.mime_type||'',
+        storagePath:im.storage_path||null,isPublic:!!im.is_public
+      });
+    }
+    WORKS=WORKS.filter(x=>!x.db).concat(rows);
+    if(alive){setDbBusy(false);bump();}
+  }catch(e){if(alive){setDbBusy(false);setMsg('warn:Veritabanı kayıtları yüklenemedi: '+(e.message||String(e)));}}})();return()=>{alive=false;};},[]);
+  const cnt=s=>WORKS.filter(w=>w.status===s).length;
+  const rec=eid!=null?WORKS.find(w=>w.id===eid):null;
+  const newRec=()=>{const id=Math.max(0,...WORKS.map(w=>Number(w.id)||0))+1;WORKS.push(Object.assign({id,custom:true,status:'draft',lib:null},BLANK(),{wk:'u'+id}));IMAGES[id]=[];bump();setEid(id);setTab('edit');setMsg('');};
+  const delRec=async r=>{try{if(r._dbId){const {data:imageRows,error:imageError}=await window.supabaseClient.from('manuscript_images').select('storage_path').eq('manuscript_id',r._dbId);if(imageError)throw imageError;const paths=(imageRows||[]).map(x=>x.storage_path).filter(Boolean);if(paths.length){const {error:storageError}=await window.supabaseClient.storage.from('manuscript-images').remove(paths);if(storageError)throw storageError;}const {error}=await window.supabaseClient.from('manuscripts').delete().eq('id',r._dbId);if(error)throw error;const others=WORKS.filter(x=>x!==r&&x._workId===r._workId);if(!others.length&&r._workId){const {error:we}=await window.supabaseClient.from('works').delete().eq('id',r._workId);if(we)throw we;}}imgsOf(r.id).forEach(m=>{if(m.up&&m.url)URL.revokeObjectURL(m.url);});delete IMAGES[r.id];WORKS.splice(WORKS.indexOf(r),1);setAsk(null);bump();setMsg('ok:Kayıt veritabanından silindi.');}catch(e){setMsg('warn:Silme işlemi başarısız: '+(e.message||String(e)));}};
+  const act=async(r,to)=>{const m=tryStatus(r,to);if(m){setMsg('warn:'+m);return;}try{if(r._dbId){const pub=to==='published';const {error:me}=await window.supabaseClient.from('manuscripts').update({is_published:pub}).eq('id',r._dbId);if(me)throw me;const {error:we}=await window.supabaseClient.from('works').update({is_published:pub}).eq('id',r._workId);if(we)throw we;}r.status=to;setMsg('ok:Durum veritabanına kaydedildi: '+ST[to]);bump();}catch(e){setMsg('warn:Durum kaydedilemedi: '+(e.message||String(e)));}};
+
+  const nav=(t,l,fn)=>h('button',{className:'abtn','aria-pressed':tab===t,onClick:fn||(()=>{setTab(t);setEid(null);setMsg('');})},l);
+  const box=msg&&h('div',{className:msg.startsWith('ok:')?'okb':'warn',role:'status'},msg.slice(msg.indexOf(':')+1));
+  let body;
+  if(tab==='edit'&&rec)body=h(Editor,{key:rec.id,rec,bump,preview:setPv,onBack:()=>{setTab('list');setEid(null);}});
+  else if(tab==='images'&&rec)body=h('div',null,h('h2',{dir:'auto'},'Görseller · '+(rec.orig||'(Adsız taslak)')),h('p',{className:'dim'},cat(rec)+' numaralı fiziksel nüshaya bağlı.'),
+    h('div',{className:'btns'},h('button',{className:'abtn',onClick:()=>setEid(null)},'Kayıt listesine dön'),h('button',{className:'abtn',onClick:()=>{if(!rec.lib)setMsg('warn:Önizleme için önce kaydı düzenleyip şehir ve kütüphaneyi kaydedin.');else setPv(rec.id);}},'Ziyaretçi görünümünde önizle')),box,h(ImageManager,{rec,bump}));
+  else if(tab==='locations')body=h(LibraryLocationManager);
+  else if(tab==='images'){const cs=WORKS.filter(w=>w.custom);body=h('div',null,h('h2',null,'Görsel yönetimi'),
+    h('p',{className:'dim'},'Görseller bir fiziksel nüsha kaydına bağlanır. DEMO kayıtlara görsel eklenmez.'),
+    !cs.length&&h('div',{className:'noimg'},'Önce “Yeni eser/nüsha ekle” ile bir kayıt oluşturun.'),
+    cs.map(w=>h('div',{key:w.id,className:'arow'},h('strong',{dir:'auto'},w.orig||'(Adsız taslak)'),h('div',{className:'dim'},cat(w)+' · '+imgsOf(w.id).length+' görüntü'),h('div',{className:'btns'},h('button',{className:'abtn p',onClick:()=>setEid(w.id)},'Görselleri yönet')))));}
+  else if(tab==='list'){const rows=WORKS.filter(w=>flt==='all'||w.status===flt);body=h('div',null,h('h2',null,'Yazma eser kayıtları'),
+    h('div',{className:'btns'},[['all','Tümü',WORKS.length],['draft','Taslak',cnt('draft')],['ready','Hazır',cnt('ready')],['published','Yayımlanmış',cnt('published')]].map(([k,n,c])=>h('button',{key:k,className:'abtn','aria-pressed':flt===k,style:flt===k?{background:'var(--goldb)',color:'var(--navy)'}:null,onClick:()=>setFlt(k)},n+' ('+c+')'))),box,
+    !rows.length&&h('div',{className:'noimg'},'Bu durumda kayıt yok.'),
+    rows.map(w=>{const l=w.lib&&libOf(w.lib);return h('article',{key:w.id,className:'arow'},
+      h('div',null,h('span',{className:'badge'},w.custom?'Yönetici kaydı':'DEMO'),' ',sbadge(w.status)),
+      h('strong',{dir:'auto',style:{fontSize:'1.2rem'}},(w.custom?w.orig:origOf(w))||'(Adsız taslak)'),
+      h('div',{className:'dim'},cat(w)+' · '+(l?LN(l,L.tr):'kütüphane girilmemiş')+' · '+imgsOf(w.id).length+' görüntü'),
+      h('div',{className:'btns'},
+        w.custom&&h('button',{className:'abtn p',onClick:()=>{setEid(w.id);setTab('edit');setMsg('');}},'Düzenle'),
+        w.custom&&h('button',{className:'abtn',onClick:()=>{setEid(w.id);setTab('images');setMsg('');}},'Görseller'),
+        w.status==='draft'&&h('button',{className:'abtn',onClick:()=>act(w,w.custom?'ready':'published')},w.custom?'Hazır olarak işaretle':'Yayımla'),
+        w.status==='ready'&&h('button',{className:'abtn',onClick:()=>act(w,'published')},'Yayımla'),
+        w.status==='ready'&&h('button',{className:'abtn',onClick:()=>act(w,'draft')},'Taslağa al'),
+        w.status==='published'&&h('button',{className:'abtn',onClick:()=>act(w,'draft')},'Yayından kaldır'),
+        w.custom&&(ask===w.id?h(React.Fragment,null,h('button',{className:'abtn d',onClick:()=>delRec(w)},'Evet, sil'),h('button',{className:'abtn',onClick:()=>setAsk(null)},'Vazgeç')):h('button',{className:'abtn d',onClick:()=>setAsk(w.id)},'Sil'))));}));}
+  else body=h('div',null,h('h2',null,'Yönetim paneli'),
+    h('p',null,'Bu alan ziyaretçi sitesinden ayrıdır. Kayıtları taslak olarak hazırlayın, kontrol edin ve ardından yayımlayın; taslaklar ziyaretçi sitesinde görünmez.'),
+    h('div',{className:'tiles'},[
+      ['Yazma eser kayıtları',WORKS.length,()=>{setFlt('all');setTab('list');}],
+      ['Taslak kayıtlar',cnt('draft'),()=>{setFlt('draft');setTab('list');}],
+      ['Yayımlanmaya hazır',cnt('ready'),()=>{setFlt('ready');setTab('list');}],
+      ['Yayımlanmış kayıtlar',cnt('published'),()=>{setFlt('published');setTab('list');}],
+      ['Görsel yönetimi',Object.values(IMAGES).reduce((a,x)=>a+x.length,0)+' görüntü',()=>{setEid(null);setTab('images');}],
+      ['Harita konumları',LIBS.length+' kütüphane',()=>{setEid(null);setTab('locations');}],
+      ['Yeni eser / nüsha ekle','+',newRec]].map(([t,n,fn])=>h('button',{key:t,className:'abtn tile',onClick:fn},h('b',null,n),t))),
+    h('p',{className:'dim',style:{marginTop:18}},'DEMO kayıtlar yer tutucudur; düzenlenemez, yalnızca yayından kaldırılıp yeniden yayımlanabilir. Mevcut kayıtları düzenlemek için “Yazma eser kayıtları” listesinden Düzenle’yi kullanın.'));
+  return h('div',{className:'adm'},
+    h('header',null,h('div',{className:'wrap bar'},h('span',{className:'adm-t'},'Yönetim · '+L.tr.short),
+      h('div',{className:'adm-n'},nav('home','Panel'),nav('list','Kayıtlar',()=>{setFlt('all');setTab('list');setEid(null);setMsg('');}),nav('images','Görseller'),nav('locations','Harita konumları'),h('button',{className:'abtn',onClick:newRec},'+ Yeni'),h('button',{className:'abtn',onClick:goSite},'Siteyi gör')))),
+    h('div',{className:'demo',role:'note'},dbBusy?'Supabase kayıtları yükleniyor…':'Katalog ve görsel kayıtları Supabase üzerinden yönetilir; görsel dosyaları manuscript-images deposunda saklanır.'),
+    h('main',{className:'wrap adm-m'},tab!=='edit'&&tab!=='list'&&tab!=='images'&&tab!=='locations'&&box,body),
+    pv!=null&&WORKS.find(x=>x.id===pv)&&h(Drawer,{key:pv,w:WORKS.find(x=>x.id===pv),T:L.tr,lang:'tr',onClose:()=>setPv(null)}));
+}
+
+
+function AdminGate({bump,goSite}){
+  const [state,setState]=useState('checking');
+  const [email,setEmail]=useState('');
+  const [password,setPassword]=useState('');
+  const [error,setError]=useState('');
+  const [busy,setBusy]=useState(false);
+  const [newPassword,setNewPassword]=useState('');
+  const [confirmPassword,setConfirmPassword]=useState('');
+  const ADMIN_USER_ID='fed3dd35-0c4d-499a-b108-4f323309c459';
+  useEffect(()=>{
+    let alive=true;
+    (async()=>{
+      try{
+        const sb=window.supabaseClient;
+        if(!sb)throw new Error('Supabase bağlantısı başlatılamadı.');
+        const {data,error}=await sb.auth.getSession();
+        if(error)throw error;
+        const user=data.session&&data.session.user;
+        if(user&&user.id===ADMIN_USER_ID){if(alive)setState('ready');}
+        else{
+          if(user)await sb.auth.signOut();
+          if(alive)setState('login');
+        }
+      }catch(e){if(alive){setError(e.message||String(e));setState('login');}}
+    })();
+    const {data:{subscription}}=window.supabaseClient.auth.onAuthStateChange((event,session)=>{
+      if(!alive)return;
+      if(event==='PASSWORD_RECOVERY'){
+        if(session&&session.user&&session.user.id===ADMIN_USER_ID){setState('recover');setError('');}
+        else{setError('Şifre yenileme bağlantısı yönetici hesabına ait değil.');setState('login');}
+        return;
+      }
+      if(session&&session.user&&session.user.id===ADMIN_USER_ID){setState('ready');setError('');}
+      else if(event==='SIGNED_OUT')setState('login');
+    });
+    return()=>{alive=false;subscription.unsubscribe();};
+  },[]);
+  const login=async ev=>{
+    ev.preventDefault();setBusy(true);setError('');
+    try{
+      const sb=window.supabaseClient;
+      const {data,error}=await sb.auth.signInWithPassword({email:email.trim(),password});
+      if(error)throw error;
+      if(!data.user||data.user.id!==ADMIN_USER_ID){
+        await sb.auth.signOut();
+        throw new Error('Bu hesap yönetici olarak yetkilendirilmemiş. Yönetici hesabıyla giriş yapın.');
+      }
+      setState('ready');
+    }catch(e){setError(e.message||'Giriş yapılamadı.');}
+    finally{setBusy(false);}
+  };
+  const updatePassword=async ev=>{
+    ev.preventDefault();setError('');
+    if(newPassword!==confirmPassword){setError('Yeni şifreler birbiriyle eşleşmiyor.');return;}
+    if(newPassword.length<6){setError('Şifre en az 6 karakter olmalıdır.');return;}
+    setBusy(true);
+    try{
+      const {error}=await window.supabaseClient.auth.updateUser({password:newPassword});
+      if(error)throw error;
+      setPassword('');setNewPassword('');setConfirmPassword('');
+      setState('ready');
+    }catch(e){setError(e.message||'Şifre güncellenemedi.');}
+    finally{setBusy(false);}
+  };
+  const logout=async()=>{
+    setBusy(true);
+    try{await window.supabaseClient.auth.signOut();setState('login');setPassword('');}
+    catch(e){setError(e.message||String(e));}
+    finally{setBusy(false);}
+  };
+  if(state==='checking')return h('main',{className:'wrap',style:{paddingBlock:60}},h('div',{className:'panel'},'Yönetici oturumu kontrol ediliyor…'));
+  if(state==='recover')return h('main',{className:'wrap',style:{maxWidth:520,paddingBlock:50}},
+    h('section',{className:'panel',style:{padding:28,border:'1px solid var(--gold)',borderRadius:12}},
+      h('h2',null,'Yeni şifre belirle'),
+      h('p',{className:'dim'},'E-posta bağlantısı doğrulandı. Yönetici hesabınız için yeni bir şifre belirleyin.'),
+      error&&h('div',{className:'warn',role:'alert'},error),
+      h('form',{onSubmit:updatePassword},
+        h('label',{style:{display:'block',marginBottom:6,fontWeight:600},htmlFor:'new-admin-password'},'Yeni şifre'),
+        h('input',{id:'new-admin-password',type:'password',autoComplete:'new-password',minLength:6,required:true,value:newPassword,onChange:e=>setNewPassword(e.target.value),style:{width:'100%',padding:12,border:'1px solid var(--line)',borderRadius:6,background:'var(--card)',marginBottom:14}}),
+        h('label',{style:{display:'block',marginBottom:6,fontWeight:600},htmlFor:'confirm-admin-password'},'Yeni şifre (tekrar)'),
+        h('input',{id:'confirm-admin-password',type:'password',autoComplete:'new-password',minLength:6,required:true,value:confirmPassword,onChange:e=>setConfirmPassword(e.target.value),style:{width:'100%',padding:12,border:'1px solid var(--line)',borderRadius:6,background:'var(--card)',marginBottom:18}}),
+        h('div',{className:'btns'},h('button',{className:'abtn p',type:'submit',disabled:busy},busy?'Şifre kaydediliyor…':'Şifreyi kaydet')))));
+  if(state!=='ready')return h('main',{className:'wrap',style:{maxWidth:520,paddingBlock:50}},
+    h('section',{className:'panel',style:{padding:28,border:'1px solid var(--gold)',borderRadius:12}},
+      h('h2',null,'Yönetici girişi'),
+      h('p',{className:'dim'},'Yönetim paneline erişmek için yetkili Supabase hesabınızla giriş yapın.'),
+      error&&h('div',{className:'warn',role:'alert',style:{marginBottom:16}},error),
+      h('form',{onSubmit:login},
+        h('label',{style:{display:'block',marginBottom:6,fontWeight:600},htmlFor:'admin-email'},'E-posta'),
+        h('input',{id:'admin-email',type:'email',autoComplete:'username',required:true,value:email,onChange:e=>setEmail(e.target.value),style:{width:'100%',padding:12,border:'1px solid var(--line)',borderRadius:6,background:'var(--card)',marginBottom:14}}),
+        h('label',{style:{display:'block',marginBottom:6,fontWeight:600},htmlFor:'admin-password'},'Şifre'),
+        h('input',{id:'admin-password',type:'password',autoComplete:'current-password',required:true,value:password,onChange:e=>setPassword(e.target.value),style:{width:'100%',padding:12,border:'1px solid var(--line)',borderRadius:6,background:'var(--card)',marginBottom:18}}),
+        h('div',{className:'btns'},
+          h('button',{className:'abtn p',type:'submit',disabled:busy},busy?'Giriş yapılıyor…':'Giriş yap'),
+          h('button',{className:'abtn',type:'button',onClick:goSite},'Siteye dön')))));
+  return h(React.Fragment,null,
+    h('div',{className:'wrap',style:{display:'flex',justifyContent:'flex-end',paddingTop:10}},
+      h('button',{className:'abtn',onClick:logout,disabled:busy},'Güvenli çıkış')),
+    h(Admin,{bump,goSite}));
+}
+
+function LibraryMap({libraries=[],editable=false,onPick,onLibrarySelect}){
+  const el=useRef(null),mapRef=useRef(null),markersRef=useRef(null),pickRef=useRef(onPick),selectRef=useRef(onLibrarySelect);
+  pickRef.current=onPick;selectRef.current=onLibrarySelect;
+  useEffect(()=>{
+    if(!el.current||!window.L||mapRef.current)return;
+    const map=window.L.map(el.current,{scrollWheelZoom:false}).setView([40.7,28.5],7);
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
+    markersRef.current=window.L.layerGroup().addTo(map);mapRef.current=map;
+    if(editable)map.on('click',e=>{const fn=pickRef.current;if(fn)fn({latitude:e.latlng.lat.toFixed(6),longitude:e.latlng.lng.toFixed(6)});});
+    const timer=window.setTimeout(()=>map.invalidateSize(),150);
+    return()=>{window.clearTimeout(timer);map.remove();mapRef.current=null;markersRef.current=null;};
+  },[editable]);
+  useEffect(()=>{
+    const map=mapRef.current,group=markersRef.current;if(!map||!group||!window.L)return;
+    group.clearLayers();
+    const points=(libraries||[]).filter(x=>x.location_verified===true&&isMarmaraCity(x.city)&&isMarmaraCoordinate(Number(x.latitude),Number(x.longitude)));
+    points.forEach(lib=>{
+      const marker=window.L.marker([Number(lib.latitude),Number(lib.longitude)]).addTo(group);
+      const popup=document.createElement('div');popup.className='library-popup';
+      const strong=document.createElement('strong');strong.textContent=lib.name||'Kütüphane';popup.appendChild(strong);
+      const meta=document.createElement('div');meta.textContent=[lib.city,lib.country||'Türkiye'].filter(Boolean).join(' · ');popup.appendChild(meta);
+      if(lib.photo_storage_path){
+        const {data}=window.supabaseClient.storage.from('library-photos').getPublicUrl(lib.photo_storage_path);
+        if(data&&data.publicUrl){const img=document.createElement('img');img.src=data.publicUrl;img.alt=(lib.name||'Kütüphane')+' fotoğrafı';img.loading='lazy';popup.appendChild(img);}
+      }
+      if(lib.photo_caption){const caption=document.createElement('div');caption.textContent=lib.photo_caption;popup.appendChild(caption);}
+      const count=document.createElement('div');count.textContent=String(lib.manuscript_count||0)+' yayımlanmış yazma nüsha';popup.appendChild(count);
+      const button=document.createElement('button');button.type='button';button.textContent='Bu kütüphanenin eserlerini göster';
+      button.addEventListener('click',()=>{const fn=selectRef.current;if(fn)fn(lib);});
+      popup.appendChild(button);marker.bindPopup(popup,{maxWidth:260});
+    });
+    if(points.length){const bounds=window.L.latLngBounds(points.map(x=>[Number(x.latitude),Number(x.longitude)]));map.fitBounds(bounds.pad(.18),{maxZoom:12});}
+    else map.setView([40.7,28.5],7);
+    window.setTimeout(()=>map.invalidateSize(),80);
+  },[libraries]);
+  return h('div',{className:'mapbox'},h('div',{ref:el,className:'leaflet-map','aria-label':'Marmara Bölgesi kütüphane haritası'}));
+}
+function LibraryLocationManager(){
+  const [rows,setRows]=useState([]),[selected,setSelected]=useState(''),[draft,setDraft]=useState({latitude:'',longitude:'',location_source:'',location_notes:'',location_verified:false,photo_caption:''}),[photoFile,setPhotoFile]=useState(null),[busy,setBusy]=useState(false),[photoBusy,setPhotoBusy]=useState(false),[msg,setMsg]=useState('');
+  useEffect(()=>{let alive=true;(async()=>{try{const {data,error}=await window.supabaseClient.from('libraries').select('*').order('name');if(error)throw error;if(!alive)return;setRows(data||[]);if(data&&data.length){const first=data[0];setSelected(first.id);setDraft({latitude:first.latitude??'',longitude:first.longitude??'',location_source:first.location_source||'',location_notes:first.location_notes||'',location_verified:!!first.location_verified,photo_caption:first.photo_caption||''});}}catch(e){if(alive)setMsg('error:Kütüphaneler yüklenemedi: '+(e.message||String(e)));}})();return()=>{alive=false;};},[]);
+  const current=rows.find(x=>String(x.id)===String(selected));
+  const choose=id=>{setSelected(id);const r=rows.find(x=>String(x.id)===String(id));setDraft(r?{latitude:r.latitude??'',longitude:r.longitude??'',location_source:r.location_source||'',location_notes:r.location_notes||'',location_verified:!!r.location_verified,photo_caption:r.photo_caption||''}:{latitude:'',longitude:'',location_source:'',location_notes:'',location_verified:false,photo_caption:''});setPhotoFile(null);setMsg('');};
+  const patch=p=>setDraft(x=>({...x,...p}));
+  const save=async()=>{if(!current)return;const lat=draft.latitude===''?null:Number(draft.latitude),lng=draft.longitude===''?null:Number(draft.longitude);if(!isMarmaraCity(current.city)){setMsg('error:Bu kütüphanenin şehri Marmara Bölgesi’nin 11 ilinden biri değil. Bu nedenle proje haritasına konum eklenemez.');return;}if(draft.location_verified&&(!Number.isFinite(lat)||!Number.isFinite(lng))){setMsg('error:Konumu doğrulamak için enlem ve boylam girin.');return;}if(lat!==null&&(!Number.isFinite(lat)||lat < -90||lat>90)){setMsg('error:Enlem -90 ile 90 arasında olmalıdır.');return;}if(lng!==null&&(!Number.isFinite(lng)||lng < -180||lng>180)){setMsg('error:Boylam -180 ile 180 arasında olmalıdır.');return;}if(draft.location_verified&&!isMarmaraCoordinate(lat,lng)){setMsg('error:Koordinatlar Marmara Bölgesi sınırları dışında görünüyor. Lütfen haritada doğru konumu seçin.');return;}setBusy(true);setMsg('');try{const payload={latitude:lat,longitude:lng,location_source:draft.location_source.trim()||null,location_notes:draft.location_notes.trim()||null,location_verified:!!draft.location_verified,photo_caption:draft.photo_caption.trim()||null};const {error}=await window.supabaseClient.from('libraries').update(payload).eq('id',current.id);if(error)throw error;setRows(rs=>rs.map(r=>String(r.id)===String(current.id)?{...r,...payload}:r));setMsg('ok:Kütüphane bilgileri ve konumu kaydedildi. Doğrulanmayan konumlar ziyaretçi haritasında gösterilmez.');}catch(e){setMsg('error:Bilgiler kaydedilemedi: '+(e.message||String(e)));}finally{setBusy(false);}};
+  const removeLocation=async()=>{
+    if(!current)return;
+    if(current.latitude==null&&current.longitude==null&&!current.location_verified){setMsg('ok:Bu kütüphane için kayıtlı bir harita konumu yok.');return;}
+    if(!window.confirm('Bu kütüphanenin harita konumunu silmek istiyor musunuz? Kütüphane, eserleri ve fotoğrafı silinmeyecek.'))return;
+    setBusy(true);setMsg('');
+    try{
+      const payload={latitude:null,longitude:null,location_verified:false,location_source:null,location_notes:null};
+      const {error}=await window.supabaseClient.from('libraries').update(payload).eq('id',current.id);
+      if(error)throw error;
+      setRows(rs=>rs.map(r=>String(r.id)===String(current.id)?{...r,...payload}:r));
+      setDraft(d=>({...d,latitude:'',longitude:'',location_verified:false,location_source:'',location_notes:''}));
+      setMsg('ok:Harita konumu silindi. Kütüphane kaydı, eserleri ve fotoğrafı korundu.');
+    }catch(e){setMsg('error:Harita konumu silinemedi: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const deleteLibrary=async()=>{
+    if(!current)return;
+    const sb=window.supabaseClient;
+    setBusy(true);setMsg('');
+    try{
+      const {data:linked,error:countError}=await sb.from('manuscripts').select('id').eq('library_id',current.id).limit(10000);
+      if(countError)throw countError;
+      const count=(linked||[]).length;
+      const warning=count
+        ? `\n\nBu kütüphaneye bağlı ${count} yazma nüshası var. Kütüphane bağlantısı kaldırılacak; yazma eser kayıtları ve görselleri korunacak.`
+        : '\n\nBu kütüphaneye bağlı yazma nüshası bulunamadı.';
+      if(!window.confirm(`“${current.name||'Adsız kütüphane'}” kaydını tamamen silmek istiyor musunuz?${warning}\n\nBu işlem geri alınamaz.`))return;
+      const photoPath=current.photo_storage_path||null;
+      let photoCleanupWarning='';
+      if(count){
+        const {error:unlinkError}=await sb.from('manuscripts').update({library_id:null}).eq('library_id',current.id);
+        if(unlinkError)throw new Error('Yazma eserlerin kütüphane bağlantısı kaldırılamadı; kütüphane silinmedi. '+unlinkError.message);
+      }
+      const {error:deleteError}=await sb.from('libraries').delete().eq('id',current.id);
+      if(deleteError){
+        if(count){const linkedIds=(linked||[]).map(x=>x.id);if(linkedIds.length)await sb.from('manuscripts').update({library_id:current.id}).in('id',linkedIds);}
+        throw deleteError;
+      }
+      if(photoPath){
+        const {error:photoError}=await sb.storage.from('library-photos').remove([photoPath]);
+        if(photoError)photoCleanupWarning=' Fotoğraf dosyası depolamadan kaldırılamadı: '+photoError.message;
+      }
+      setRows(rs=>rs.filter(r=>String(r.id)!==String(current.id)));
+      const remaining=rows.filter(r=>String(r.id)!==String(current.id));
+      const next=remaining[0]||null;
+      setSelected(next?next.id:'');
+      setDraft(next?{latitude:next.latitude??'',longitude:next.longitude??'',location_source:next.location_source||'',location_notes:next.location_notes||'',location_verified:!!next.location_verified,photo_caption:next.photo_caption||''}:{latitude:'',longitude:'',location_source:'',location_notes:'',location_verified:false,photo_caption:''});
+      setPhotoFile(null);
+      setMsg('ok:Kütüphane tamamen silindi. Bağlı yazma eser kayıtları ve görselleri korundu; kütüphane bağlantıları kaldırıldı. Ziyaretçi haritasından da kalkacaktır.'+photoCleanupWarning);
+    }catch(e){setMsg('error:Kütüphane silinemedi: '+(e.message||String(e)));}
+    finally{setBusy(false);}
+  };
+  const uploadPhoto=async()=>{
+    if(!current||!photoFile)return;
+    if(!/^image\/(jpeg|png|webp)$/.test(photoFile.type)){setMsg('error:Yalnızca JPG, PNG veya WEBP fotoğraf yükleyebilirsiniz.');return;}
+    if(photoFile.size>8*1024*1024){setMsg('error:Fotoğraf en fazla 8 MB olabilir.');return;}
+    setPhotoBusy(true);setMsg('');
+    try{
+      const sb=window.supabaseClient,oldPath=current.photo_storage_path||null;
+      const safeName=photoFile.name.toLowerCase().replace(/[^a-z0-9._-]+/g,'-').replace(/^-+|-+$/g,'')||'library-photo';
+      const newPath=String(current.id)+'/'+Date.now()+'-'+safeName;
+      const {error:upError}=await sb.storage.from('library-photos').upload(newPath,photoFile,{cacheControl:'3600',contentType:photoFile.type,upsert:false});
+      if(upError)throw upError;
+      const caption=draft.photo_caption.trim()||null;
+      const {error:dbError}=await sb.from('libraries').update({photo_storage_path:newPath,photo_caption:caption}).eq('id',current.id);
+      if(dbError){await sb.storage.from('library-photos').remove([newPath]);throw dbError;}
+      if(oldPath)await sb.storage.from('library-photos').remove([oldPath]);
+      setRows(rs=>rs.map(r=>String(r.id)===String(current.id)?{...r,photo_storage_path:newPath,photo_caption:caption}:r));
+      setPhotoFile(null);setMsg('ok:Kütüphane fotoğrafı yüklendi ve kaydedildi.');
+    }catch(e){setMsg('error:Fotoğraf yüklenemedi: '+(e.message||String(e)));}
+    finally{setPhotoBusy(false);}
+  };
+  const removePhoto=async()=>{
+    if(!current||!current.photo_storage_path)return;
+    if(!window.confirm('Bu kütüphane fotoğrafını silmek istiyor musunuz?'))return;
+    setPhotoBusy(true);setMsg('');
+    try{
+      const oldPath=current.photo_storage_path;
+      const {error}=await window.supabaseClient.from('libraries').update({photo_storage_path:null,photo_caption:null}).eq('id',current.id);
+      if(error)throw error;
+      const {error:storageError}=await window.supabaseClient.storage.from('library-photos').remove([oldPath]);
+      if(storageError)throw storageError;
+      setRows(rs=>rs.map(r=>String(r.id)===String(current.id)?{...r,photo_storage_path:null,photo_caption:null}:r));
+      patch({photo_caption:''});setMsg('ok:Kütüphane fotoğrafı silindi.');
+    }catch(e){setMsg('error:Fotoğraf silinemedi: '+(e.message||String(e)));}
+    finally{setPhotoBusy(false);}
+  };
+  const verified=rows.filter(r=>r.location_verified&&isMarmaraCity(r.city)&&isMarmaraCoordinate(Number(r.latitude),Number(r.longitude)));
+  const photoUrl=current&&current.photo_storage_path?window.supabaseClient.storage.from('library-photos').getPublicUrl(current.photo_storage_path).data.publicUrl:'';
+  return h('div',null,h('h2',null,'Kütüphane konumları ve fotoğrafları'),h('p',{className:'dim'},'Önce eser ve nüsha kayıtlarını oluştur. Kütüphaneler bu kayıtlardan gelir. Bir kütüphane seçip haritaya tıklayarak koordinat belirle; kaynağı kontrol edip konumu doğrula. Fotoğraf ekleyebilir, değiştirebilir veya silebilirsin. Doğrulanmayan konum ziyaretçi haritasında gösterilmez.'),
+    msg&&h('div',{className:msg.startsWith('ok:')?'okb':'warn',role:'status'},msg.slice(msg.indexOf(':')+1)),
+    !rows.length?h('div',{className:'panel'},'Henüz kütüphane kaydı yok. Önce bir yazma nüshasına kütüphane adı ve şehir ekleyip kaydet.') :
+    h(React.Fragment,null,
+      h('div',{className:'fgrid'},
+        h(Fld,{label:'Kütüphane seç'},h('select',{value:selected,onChange:e=>choose(e.target.value)},rows.map(r=>h('option',{key:r.id,value:r.id},(r.name||'Adsız kütüphane')+' · '+(r.city||'Şehir yok'))))),
+        current&&h('div',{className:'fld'},h('span',null,'Şehir'),h('div',{className:'panel'},current.city||'Belirtilmemiş')),
+        h('div',{className:'fld'},h('span',null,'Enlem'),h('input',{value:draft.latitude,onChange:e=>patch({latitude:e.target.value}),placeholder:'Haritaya tıklayarak doldurabilirsiniz'})),
+        h('div',{className:'fld'},h('span',null,'Boylam'),h('input',{value:draft.longitude,onChange:e=>patch({longitude:e.target.value}),placeholder:'Haritaya tıklayarak doldurabilirsiniz'})),
+        h('div',{className:'fld w'},h('span',null,'Konum kaynağı / referans'),h('input',{value:draft.location_source,onChange:e=>patch({location_source:e.target.value}),placeholder:'Kurumun resmî adres sayfası, katalog vb.'})),
+        h('div',{className:'fld w'},h('span',null,'Doğrulama notu'),h('textarea',{value:draft.location_notes,onChange:e=>patch({location_notes:e.target.value}),rows:2})),
+        h('div',{className:'fld w'},h('label',{className:'chk'},h('input',{type:'checkbox',checked:!!draft.location_verified,onChange:e=>patch({location_verified:e.target.checked})}),'Konum kaynağını kontrol ettim ve doğruladım')),
+        h('div',{className:'fld w'},h('div',{className:'btns'},h('button',{className:'abtn p',disabled:busy||!current,onClick:save},busy?'Kaydediliyor…':'Konum ve açıklamayı kaydet'),h('button',{className:'abtn d',disabled:busy||!current||(current.latitude==null&&current.longitude==null&&!current.location_verified),onClick:removeLocation},busy?'İşleniyor…':'Konumu sil'),h('button',{className:'abtn d',disabled:busy||!current,onClick:deleteLibrary},busy?'İşleniyor…':'Kütüphaneyi tamamen sil')))),
+      h('section',{className:'panel',style:{marginTop:18}},
+        h('h3',{style:{fontSize:'1.4rem',marginBottom:8}},'Kütüphane fotoğrafı'),
+        photoUrl&&h('img',{src:photoUrl,alt:(current.name||'Kütüphane')+' fotoğrafı',style:{display:'block',maxWidth:'min(100%,420px)',maxHeight:240,objectFit:'cover',marginBottom:12,border:'1px solid var(--gold)'}}),
+        !photoUrl&&h('p',{className:'dim'},'Henüz fotoğraf eklenmemiş.'),
+        h('div',{className:'fld'},h('span',null,'Fotoğraf açıklaması'),h('input',{value:draft.photo_caption,onChange:e=>patch({photo_caption:e.target.value}),placeholder:'Örn. Kütüphanenin dış görünümü'})),
+        h('div',{className:'fld',style:{marginTop:10}},h('span',null,'Fotoğraf dosyası (JPG, PNG veya WEBP · en fazla 8 MB)'),h('input',{type:'file',accept:'image/jpeg,image/png,image/webp',onChange:e=>setPhotoFile(e.target.files&&e.target.files[0]||null)})),
+        h('div',{className:'btns'},h('button',{className:'abtn p',disabled:photoBusy||!photoFile,onClick:uploadPhoto},photoBusy?'Yükleniyor…':'Fotoğrafı yükle'),photoUrl&&h('button',{className:'abtn d',disabled:photoBusy,onClick:removePhoto},'Fotoğrafı sil'))),
+      h('p',{className:'map-note'},'Haritaya tıkla: seçili kütüphanenin enlem ve boylam alanları dolar. Kaydetmeden veritabanı değişmez.'),
+      h(LibraryMap,{libraries:[],editable:true,onPick:p=>patch(p)}),
+      h('p',{className:'dim'},verified.length+' doğrulanmış kütüphane ziyaretçi haritasında gösterilecek.')));
+}
+function ResearchTools({T,lang,compareId,onCompareChange,dbState,dbError}){
+  const [statsOpen,setStatsOpen]=useState(false);
+  const records=dbState==='ready'
+    ?PUB().filter(w=>CITIES.some(city=>city.id===libOf(w.lib).c)&&isWithinProjectPeriod(w.coT))
+    :[];
+  const groups=new Map();
+  records.forEach(w=>{
+    const key=String(w.wk||w.id);
+    if(!groups.has(key))groups.set(key,[]);
+    groups.get(key).push(w);
+  });
+  const comparable=[...groups.entries()]
+    .filter(([,items])=>items.length>1)
+    .sort((a,b)=>origOf(a[1][0]).localeCompare(origOf(b[1][0]),'tr'));
+  const selected=comparable.find(([id])=>id===String(compareId))||comparable[0];
+  const totalCopies=records.length;
+  const totalWorks=groups.size;
+  const totalLibraries=new Set(records.map(w=>String(w.lib))).size;
+  const rows=CITIES.map(city=>{
+    const items=records.filter(w=>libOf(w.lib).c===city.id);
+    return {
+      id:city.id,
+      name:city.n[lang]||city.n.tr,
+      copies:items.length,
+      libraries:new Set(items.map(w=>String(w.lib))).size
+    };
+  }).filter(item=>item.copies>0);
+  const maxCopies=Math.max(1,...rows.map(item=>item.copies));
+  const label=(name,value)=>h('div',
+    {className:'fld',style:{minWidth:0}},
+    h('span',null,name),
+    h('strong',{style:{display:'block',fontSize:'1.15rem',overflowWrap:'anywhere'}},value||'—')
+  );
+  const loadingPanel=dbState==='loading'
+    ?h('div',{className:'panel','aria-live':'polite'},T.loading)
+    :dbState==='error'
+      ?h('div',{className:'warn',role:'alert'},T.loadError+' '+(dbError||''))
+      :null;
+  const statsContent=loadingPanel||h(React.Fragment,null,
+    h('div',{className:'cards'},
+      [[T.manuscripts,totalCopies],[T.worksCount,totalWorks],[T.libraries,totalLibraries]]
+        .map((item,index)=>h('div',{className:'fcard',key:index},
+          h('div',{className:'dim'},item[0]),
+          h('div',{style:{fontSize:'2rem',fontWeight:700,color:'var(--gold)'}},String(item[1]))
+        ))
+    ),
+    h('div',{className:'panel',style:{marginTop:18}},
+      h('h3',null,T.cityDistribution),
+      rows.length
+        ?rows.map(item=>h('div',{key:item.id,style:{display:'grid',gridTemplateColumns:'minmax(88px,130px) 1fr minmax(112px,auto)',gap:12,alignItems:'center',margin:'12px 0'}},
+          h('strong',null,item.name),
+          h('div',{style:{height:13,background:'rgba(184,146,63,.16)',borderRadius:20,overflow:'hidden'}},
+            h('div',{style:{height:'100%',width:(item.copies/maxCopies*100)+'%',background:'var(--gold)',borderRadius:20}})
+          ),
+          h('span',{className:'dim',style:{textAlign:'end'}},item.copies+' '+T.copies+' · '+item.libraries+' '+T.libraries)
+        ))
+        :h('p',{className:'dim'},T.statsEmpty)
+    )
+  );
+  let compareContent=loadingPanel;
+  if(!loadingPanel){
+    if(!selected){
+      compareContent=h('div',{className:'panel'},T.compareNone);
+    }else{
+      const selector=h('div',{className:'fld',style:{maxWidth:650,marginBottom:18}},
+        h('span',null,T.comparePick),
+        h('select',{value:selected[0],onChange:e=>onCompareChange(e.target.value)},
+          comparable.map(([id,items])=>h('option',{key:id,value:id},origOf(items[0])+' · '+items.length+' '+T.copies))
+        )
+      );
+      const cards=h('div',{className:'cards'},selected[1].map(w=>{
+        const library=libOf(w.lib);
+        return h('article',{className:'fcard',key:w.id},
+          h('h3',{style:{fontSize:'1.25rem'}},LN(library,T)),
+          h('p',{className:'dim'},cityOf(library.c).n[lang]||cityOf(library.c).n.tr),
+          label(T.f.orig,origOf(w)),
+          label(T.f.tl,tlOf(w,T)),
+          label(T.f.au,auOf(w,T)),
+          label(T.f.co,w.coT),
+          label(T.copyDate,w.cpT),
+          label(T.f.ep,w.epT),
+          label(T.collection,w.clT),
+          label(T.shelfmark,w.catNo),
+          label(T.verification,w.vs==='ok'?T.v.ok:w.vs==='conf'?T.v.conf:T.v.unv),
+          label(T.confidence,T.v[w.cf]||T.v.none),
+          label(T.f.nt,w.note),
+          h('button',{className:'btn alt',style:{marginTop:12},onClick:()=>{
+            window.dispatchEvent(new CustomEvent('open-manuscript',{detail:w.id}));
+          }},T.openCopy)
+        );
+      }));
+      compareContent=h(React.Fragment,null,selector,cards);
+    }
+  }
+  return h(React.Fragment,null,
+    h('section',{className:'blk',id:'stats'},
+      h('div',{className:'wrap'},
+        h('button',{
+          type:'button',
+          className:'stats-toggle',
+          'aria-expanded':statsOpen,
+          'aria-controls':'stats-details',
+          onClick:()=>setStatsOpen(value=>!value)
+        },
+          h('span',null,T.cityDistribution),
+          h('span',{className:'stats-chevron','aria-hidden':true},statsOpen?'−':'+')
+        ),
+        statsOpen&&h('div',{id:'stats-details',className:'stats-details'},
+          h('p',{className:'dim'},T.statsN),
+          statsContent
+        )
+      )
+    ),
+    h('section',{className:'blk',id:'compare'},
+      h('div',{className:'wrap'},
+        h('h2',null,T.compareT),
+        h('p',{className:'dim'},T.compareN),
+        compareContent
+      )
+    )
+  );
+}
+function App(){
+  const [lang,setLang]=useState('tr'),[q,setQ]=useState(''),[city,setCity]=useState(null),[lib,setLib]=useState(null),[wl,setWl]=useState('all'),[open,setOpen]=useState(null),[compareId,setCompareId]=useState(''),[route,setRoute]=useState(location.hash==='#admin'?'admin':'site'),[,bump]=useState(0),[dbState,setDbState]=useState('loading'),[dbError,setDbError]=useState(''),[mapLibraries,setMapLibraries]=useState([]),[contactBusy,setContactBusy]=useState(false),[contactFeedback,setContactFeedback]=useState('');
+  const T=L[lang];
+  useEffect(()=>{
+    let alive=true;
+    (async()=>{
+      try{
+        const sb=window.supabaseClient;
+        if(!sb)throw new Error('Supabase bağlantısı başlatılamadı.');
+        // KALICI VERİ KURALI: Ziyaretçi açılışı yalnızca public_* görünümlerini okur.
+        // Burada eser/nüsha/görsel kayıtlarına yazma, yayın veya hak alanlarını değiştirme.
+        const [wr,mr,lr,ir]=await Promise.all([
+          sb.from('public_works').select('*').limit(1000),
+          sb.from('public_manuscripts').select('*').limit(1000),
+          sb.from('libraries').select('*').limit(1000),
+          sb.from('public_manuscript_images').select('*').order('display_order',{ascending:true}).limit(5000)
+        ]);
+        if(wr.error)throw wr.error;
+        if(mr.error)throw mr.error;
+        if(ir.error)throw ir.error;
+        const worksById=new Map((wr.data||[]).map(x=>[String(x.id),x]));
+        const normLang=v=>{
+          const a=Array.isArray(v)?v:String(v||'').split(/[,+;|]/);
+          return [...new Set(a.map(x=>String(x).trim().toLowerCase()).map(x=>
+            ['tr','turkish','türkçe','turkce'].includes(x)?'tr':
+            ['ar','arabic','عربي','عربية'].includes(x)?'ar':
+            ['fa','persian','farsi','فارسی'].includes(x)?'fa':null).filter(Boolean))];
+        };
+        const cityId=v=>dbCityId(v);
+        const libraryRows=lr.error?[]:(lr.data||[]);
+        const publishedCounts=new Map();(mr.data||[]).forEach(m=>{if(m.library_id!=null)publishedCounts.set(String(m.library_id),(publishedCounts.get(String(m.library_id))||0)+1);});
+        if(alive)setMapLibraries(libraryRows.filter(l=>isMarmaraCity(l.city)&&isMarmaraCoordinate(Number(l.latitude),Number(l.longitude))).map(l=>({...l,manuscript_count:publishedCounts.get(String(l.id))||0})));
+        const libraryById=new Map(libraryRows.map(x=>[String(x.id),x]));
+        const mappedLibs=[],seenLibs=new Set();
+        (mr.data||[]).forEach(m=>{
+          if(m.library_id==null||seenLibs.has(String(m.library_id)))return;
+          seenLibs.add(String(m.library_id));
+          const l=libraryById.get(String(m.library_id))||{};
+          mappedLibs.push({id:m.library_id,name:l.name||l.name_original||'Kütüphane bilgisi henüz eklenmemiş',c:cityId(l.city||l.city_name),k:0});
+        });
+        LIBS=mappedLibs;
+        const manuscripts=(mr.data||[]).filter(m=>{const l=libraryRows.find(x=>String(x.id)===String(m.library_id));return !!l&&isMarmaraCity(l.city);});
+        WORKS=manuscripts.map((m,i)=>{
+          const w=worksById.get(String(m.work_id))||{};
+          return {
+            id:i+1,_dbId:m.id,wk:String(m.work_id||m.id),lib:m.library_id,
+            custom:true,db:true,status:'published',
+            orig:m.title_original||w.title_original||'Başlık belirtilmemiş',
+            tl:m.title_transliteration||w.title_transliteration||'',
+            au:w.author_name||w.author||'',
+            lang:normLang(w.language||w.languages),
+            type:['poetry','prose','history'].includes(w.genre)?w.genre:'other',
+            typeTxt:w.genre||'',coT:w.composition_date_text||'',
+            cpT:m.copy_date_text||'',epT:m.copy_place||'',
+            clT:m.collection_name||'',catNo:m.shelfmark||'',
+            fo:m.folio_count==null?'':String(m.folio_count),
+            vs:m.verification_status==='verified'?'ok':m.verification_status==='conflict'?'conf':'unv',
+            cf:['low','mid','high'].includes(m.confidence_level)?m.confidence_level:'none',
+            note:m.verification_notes||'',sc:m.description||'',rg:'',_dbId:m.id
+          };
+        });
+        IMAGES={};
+        const signedUrlErrors=[];
+        if(!ir.error){
+          const publicImages=await Promise.all((ir.data||[]).map(async im=>{
+            let url='';
+            if(im.storage_path&&!im.is_missing){
+              const {data,error}=await sb.storage.from('manuscript-images').createSignedUrl(im.storage_path,3600);
+              if(error){signedUrlErrors.push(String(im.file_name||im.id||im.storage_path)+': '+(error.message||String(error)));}
+              else if(data)url=data.signedUrl;
+            }
+            return {...im,_signedUrl:url};
+          }));
+          publicImages.forEach((im,j)=>{
+            const rec=WORKS.find(x=>String(x._dbId)===String(im.manuscript_id));
+            if(!rec)return;
+            (IMAGES[rec.id]||(IMAGES[rec.id]=[])).push({
+              id:im.id||j+1,seq:Number(im.display_order)||j+1,
+              folio:String(im.folio_label||im.page_number||'?').replace(/[ab]$/i,''),
+              side:['a','b','single','unknown'].includes(String(im.side||'').toLowerCase())?String(im.side).toLowerCase():'unknown',
+              desc:im.description||'',src:im.image_source||im.source_name||'',
+              url:im._signedUrl||'',link:'',rights:im.usage_notes||im.rights_label||'',rightsStatus:im.rights_status||'unknown',
+              missing:!!im.is_missing,up:false,storagePath:im.storage_path||null,isPublic:!!im.is_public
+            });
+          });
+        }
+        if(!alive)return;
+        if(signedUrlErrors.length)setDbError('Görsel bağlantısı oluşturulamadı: '+signedUrlErrors.join(' | '));
+        setDbState('ready');
+        bump(x=>x+1);
+      }catch(e){
+        if(!alive)return;
+        setDbError(e&&e.message?e.message:String(e));
+        setDbState('error');
+      }
+    })();
+    return()=>{alive=false;};
+  },[]);
+  const sendContact=async e=>{
+    e.preventDefault();
+    if(contactBusy)return;
+    const form=e.currentTarget;
+    const fd=new FormData(form);
+    const name=String(fd.get('name')||'').trim();
+    const email=String(fd.get('email')||'').trim();
+    const subject=String(fd.get('subject')||'').trim();
+    const message=String(fd.get('message')||'').trim();
+    if(!name||!email||!subject||!message){setContactFeedback('Lütfen tüm alanları doldurun.');return;}
+    setContactBusy(true);setContactFeedback('Mesajınız gönderiliyor…');
+    try{
+      const {data,error}=await window.supabaseClient.functions.invoke('contact-message',{
+        body:{name,email,message:'Konu: '+subject+'\n\n'+message}
+      });
+      if(error)throw error;
+      if(!data||data.success!==true)throw new Error(data&&data.error?data.error:'Sunucudan gönderim onayı alınamadı.');
+      form.reset();
+      setContactFeedback('Mesajınız başarıyla gönderildi. Teşekkür ederiz.');
+    }catch(err){
+      console.error('İletişim formu gönderim hatası:',err);
+      setContactFeedback('Mesaj gönderilemedi. Lütfen biraz sonra yeniden deneyin. ('+(err&&err.message?err.message:'Bağlantı hatası')+')');
+    }finally{setContactBusy(false);}
+  };
+  const go=r=>{setRoute(r);window.scrollTo(0,0);try{history.replaceState(null,'',r==='admin'?'#admin':'#top');}catch(e){}};
+  useEffect(()=>{const d=document.documentElement,ad=route==='admin';d.lang=ad?'tr':lang;d.dir=ad||lang==='tr'?'ltr':'rtl';document.title=(ad?'Yönetim · ':'')+T.brand;},[lang,route]);
+  useEffect(()=>{const f=()=>{setRoute(location.hash==='#admin'?'admin':'site');window.scrollTo(0,0);};const openRec=e=>setOpen(e.detail);window.addEventListener('hashchange',f);window.addEventListener('open-manuscript',openRec);return()=>{window.removeEventListener('hashchange',f);window.removeEventListener('open-manuscript',openRec);};},[]);
+  if(route==='admin')return h(AdminGate,{bump:()=>bump(x=>x+1),goSite:()=>go('site')});
+  const goWorks=()=>{const e=document.getElementById('works');e&&e.scrollIntoView({behavior:'smooth',block:'start'});};
+  const showLibraryWorks=library=>{
+    const match=LIBS.find(x=>String(x.id)===String(library.id)||String(x.dbId)===String(library.id));
+    setCity(match?match.c:null);setLib(library.id);setWl('all');setQ('');
+    window.setTimeout(goWorks,80);
+  };
+  const nLib=id=>PUB().filter(w=>w.lib===id).length;
+  const nCity=id=>PUB().filter(w=>libOf(w.lib).c===id).length;
+  const base=PUB().filter(w=>{
+    const l=libOf(w.lib);
+    if(city&&l.c!==city)return false; if(lib&&w.lib!==lib)return false; if(wl!=='all'&&!w.lang.includes(wl))return false;
+    return true;});
+  /* arama: önce tam ifade; sonuç yoksa sözcüklerin hepsi */
+  const hayOf=w=>{const l=libOf(w.lib);return norm([origOf(w),tlOf(w,T),auOf(w,T),LN(l,T),cat(w),cityOf(l.c).n[lang],cityOf(l.c).n.tr].join(' '));};
+  const nq=norm(q).trim(),exact=nq?base.filter(w=>hayOf(w).includes(nq)):base;
+  const list=nq&&!exact.length?base.filter(w=>nq.split(/\s+/).every(t=>hayOf(w).includes(t))):exact;
+  const pickCity=id=>{setCity(city===id?null:id);setLib(null);};
+  const reset=()=>{setQ('');setCity(null);setLib(null);setWl('all');};
+  const libs=LIBS.filter(l=>(!city||l.c===city)&&(!l.custom||nLib(l.id)>0));
+
+  return h(React.Fragment,null,
+    h('header',null,h('div',{className:'wrap bar'},
+      h('a',{className:'brand',href:'#top',onClick:e=>{e.preventDefault();window.scrollTo(0,0);},style:{color:'inherit',textDecoration:'none'}},h(Star),h('span',null,T.short)),
+      h('nav',{'aria-label':T.short},['libs','map','works','stats','compare','about','contact'].map((id,i)=>h('a',{key:id,href:'#'+id,onClick:e=>{e.preventDefault();const t=document.getElementById(id);t&&t.scrollIntoView();}},T.nav[i]))),
+      h('div',{className:'langs',role:'group','aria-label':'Language / اللغة / زبان'},
+        LANGS.map(([k,n])=>h('button',{key:k,'aria-pressed':lang===k,lang:k,onClick:()=>setLang(k)},n))))),
+    h('main',{id:'top'},
+      h('section',{className:'hero'},h('div',{className:'wrap'},h('div',{className:'frame'},
+        h('h1',null,T.brand),h('p',null,T.lead),
+        h('form',{className:'search',role:'search',onSubmit:e=>{e.preventDefault();goWorks();}},
+          h('input',{type:'search',value:q,placeholder:T.ph,'aria-label':T.ph,onChange:e=>setQ(e.target.value)}),
+          h('button',{className:'btn',type:'submit'},T.go))))),
+
+      h('section',{className:'blk',id:'libs'},h('div',{className:'wrap'},
+        h('h2',null,T.featT),h('p',{className:'dim'},T.featN),
+        h('div',{className:'cards'},LIBS.slice(0,3).map(l=>{const id=l.id;return h('div',{key:String(id),className:'fcard'},
+          
+          h('h3',{style:{fontSize:'1.45rem'}},LN(l,T)),h('div',{className:'dim'},cityOf(l.c).n[lang]+' · '+nLib(id)+' '+T.rec),
+          h('div',null,h('button',{className:'btn alt',onClick:()=>{setCity(l.c);setLib(id);goWorks();}},T.seeRec)));})))),
+
+      h('section',{className:'blk',id:'map'},h('div',{className:'wrap'},h('h2',null,T.mapT),h('p',{className:'dim'},T.mapN),h(LibraryMap,{libraries:mapLibraries,onLibrarySelect:showLibraryWorks}),h('p',{className:'map-note'},T.mapTag+' · © OpenStreetMap'))),
+
+      h('section',{className:'blk',id:'works'},h('div',{className:'wrap'},
+        h('h2',null,T.worksT),h('p',{className:'dim'},T.worksN),
+        h('div',{role:'group','aria-label':T.cityF,className:'frow'},h('span',{className:'dim fl'},T.cityF+':'),[null,...CITIES.filter(c=>!c.custom||nCity(c.id)>0)].map(c=>h('button',{key:c?c.id:'all',className:'chip','aria-pressed':city===(c?c.id:null),onClick:()=>pickCity(c?c.id:null)},c?c.n[lang]+' ('+nCity(c.id)+')':T.all))),
+        city&&h('div',{role:'group','aria-label':T.libsIn,className:'frow'},h('span',{className:'dim fl'},T.libsIn+':'),[null,...LIBS.filter(l=>l.c===city)].map(l=>h('button',{key:l?l.id:'allL',className:'chip','aria-pressed':lib===(l?l.id:null),onClick:()=>setLib(l?l.id:null)},l?LN(l,T)+' ('+nLib(l.id)+')':T.all))),
+        h('div',{role:'group','aria-label':T.wl},h('span',{className:'dim',style:{marginInlineEnd:10}},T.wl+':'),
+          ['all','tr','ar','fa'].map(k=>h('button',{key:k,className:'chip','aria-pressed':wl===k,onClick:()=>setWl(k)},k==='all'?T.all:T.langN[k]))),
+        dbState==='loading'?h('div',{className:'panel','aria-live':'polite'},T.loading):
+        dbState==='error'?h('div',{className:'warn',role:'alert'},T.loadError+' '+dbError):
+        !WORKS.length?h('div',{className:'panel','aria-live':'polite'},T.noData):
+        h(React.Fragment,null,dbError&&h('div',{className:'warn',role:'alert'},dbError),h('p',{className:'dim','aria-live':'polite'},list.length+' '+T.shown),
+          list.length?h('div',{className:'mcards'},list.map(w=>h(Card,{key:w.id,w,T,lang,onOpen:x=>setOpen(x.id)}))):
+            h('div',{className:'panel'},h('p',null,T.none),h('button',{className:'btn',onClick:reset},T.clear))))),
+
+      h(ResearchTools,{T,lang,compareId,onCompareChange:setCompareId,dbState,dbError}),
+
+      h('section',{className:'blk',id:'about'},h('div',{className:'wrap'},
+        h('h2',null,T.abT),h('p',null,T.ab1),
+        h('div',{className:'two'},h('div',null,h('strong',null,T.d1),h('br'),T.d1t),h('div',null,h('strong',null,T.d2),h('br'),T.d2t)),
+        h('p',null,T.ab2))),
+
+      h('section',{className:'blk',id:'contact'},h('div',{className:'wrap'},
+        h('div',{className:'two'},
+          h('div',null,h('h3',{style:{fontSize:'1.5rem'}},T.srcT),h('p',{className:'dim'},T.srcP)),
+          h('div',null,h('h3',{style:{fontSize:'1.5rem'}},T.ctT),h('p',{className:'dim'},T.ctP),
+            h('form',{className:'panel',onSubmit:sendContact},
+              h('label',{className:'fld'},h('span',null,'Adınız'),h('input',{name:'name',required:true,autoComplete:'name'})),
+              h('label',{className:'fld'},h('span',null,'E-posta adresiniz'),h('input',{name:'email',type:'email',required:true,autoComplete:'email'})),
+              h('label',{className:'fld'},h('span',null,'Konu'),h('input',{name:'subject',required:true})),
+              h('label',{className:'fld'},h('span',null,'Mesajınız'),h('textarea',{name:'message',required:true,rows:5})),
+              h('p',{role:'status','aria-live':'polite',style:{minHeight:24,margin:'12px 0',color:contactFeedback.startsWith('Mesaj gönderilemedi')?'#9B2C2C':'var(--muted)'}},contactFeedback),
+              h('button',{className:'btn',type:'submit',disabled:contactBusy,style:contactBusy?{opacity:.65,cursor:'wait'}:undefined},contactBusy?'Gönderiliyor…':T.ctB))))))),
+    h('footer',null,h('div',{className:'wrap'},T.foot,' · ',h('button',{onClick:()=>go('admin'),style:{background:'none',border:'1px solid #D2AE5B',color:'#EFE3C6',minHeight:48,padding:'0 18px',borderRadius:6,cursor:'pointer',fontWeight:600,marginInlineStart:10,marginTop:8}},'Admin · Yönetici girişi'))),
+    open&&h(Drawer,{key:open,w:WORKS.find(x=>x.id===open),T,lang,onClose:()=>setOpen(null)}));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>
