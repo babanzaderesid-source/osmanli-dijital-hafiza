@@ -1416,7 +1416,6 @@ function ResearchTools({T,lang,compareId,onCompareChange,dbState,dbError}){
   
       });
   
-      const dateNotice=currentCopies.some(w=>!String(w.coT||'').trim())?h('div',{className:'warn',role:'note',style:{marginBottom:14}},lang==='tr'?'Bu eserin telif tarihi katalogda boş. Nüshalar karşılaştırmaya açıldı; ancak 1512–1520 proje dönemi uygunluğu telif tarihi doğrulanmadan kesinleşmiş sayılmaz.':'The composition date is missing from the catalogue. Copies are available for comparison, but project-period eligibility is not confirmed until the date is verified.'):null;
       const copyPicker=h('details',{className:'panel',open:true,style:{marginBottom:18}},
         h('summary',{style:{cursor:'pointer',fontWeight:700,color:'var(--gold)',padding:'4px 0'}},
           (lang==='tr'?'Karşılaştırmaya dahil edilecek nüshaları seç · ':'Select copies to compare · ')+currentCopies.length+' '+T.copies+' · '+pickedCopyIds.length+' '+(lang==='tr'?'seçili':'selected')),
@@ -1478,7 +1477,7 @@ function ResearchTools({T,lang,compareId,onCompareChange,dbState,dbError}){
         h('span',{className:'dim'},(lang==='tr'?'Karşılaştırma grubu ':'Comparison group ')+(safeComparePage+1)+' / '+comparePageCount+' · '+(lang==='tr'?'Seçili ':'Selected ')+chosenCopies.length+' '+T.copies+' · '+(lang==='tr'?'Her görünümde en fazla 3 nüsha':'Up to 3 copies per view')),
         h('div',{className:'btns'},h('button',{type:'button',className:'btn alt',disabled:safeComparePage===0,onClick:()=>setComparePage(p=>Math.max(0,p-1))},lang==='tr'?'← Önceki 3 nüsha':'← Previous 3'),h('button',{type:'button',className:'btn alt',disabled:safeComparePage>=comparePageCount-1,onClick:()=>setComparePage(p=>Math.min(comparePageCount-1,p+1))},lang==='tr'?'Sonraki 3 nüsha →':'Next 3 →'))):null;
 
-      compareContent=h(React.Fragment,null,selector,searchBox,dateNotice,copyPicker,comparePager,comparisonTable,comparisonImages,cards);
+      compareContent=h(React.Fragment,null,selector,searchBox,copyPicker,comparePager,comparisonTable,comparisonImages,cards);
   
     }
   }
