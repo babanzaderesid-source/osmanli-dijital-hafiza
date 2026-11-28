@@ -160,6 +160,13 @@ html[dir=rtl] .dw{--sx:-40px}
 .compare-image-open img{display:block;width:100%;height:260px;object-fit:contain;background:#0B1630}
 .compare-image-caption{font-size:.9rem;color:var(--muted);overflow-wrap:anywhere}
 .compare-image-empty{padding:14px;border:1px dashed var(--gold);color:var(--muted);font-size:.95rem}
+.compare-copy-picker{border-inline-start:4px solid var(--gold)}
+.compare-copy-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:8px;margin-top:12px}
+.compare-copy-option{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:rgba(184,146,63,.045);cursor:pointer;min-width:0}
+.compare-copy-option:has(input:checked){border-color:var(--gold);background:rgba(184,146,63,.12)}
+.compare-copy-option input{width:20px;height:20px;flex:0 0 20px;margin-top:2px;accent-color:var(--gold)}
+.compare-copy-main{display:flex;flex-direction:column;gap:2px;min-width:0;overflow-wrap:anywhere}
+.compare-copy-shelf{font-size:.9rem;color:var(--muted)}
 @media(max-width:680px){.compare-image-column{flex-basis:88vw}.compare-image-open img{height:300px}}
 footer{background:var(--navy);color:#D8D2BF;padding:30px 0;font-size:.95rem}
 
@@ -273,7 +280,9 @@ const norm=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f\u064B-\u0
 const isWithinProjectPeriod=value=>{
   const latin=String(value||'').replace(/[۰-۹٠-٩]/g,ch=>{const n=ch.charCodeAt(0);return String(n>=0x06F0&&n<=0x06F9?n-0x06F0:n-0x0660);});
   const years=(latin.match(/\d{4}/g)||[]).map(Number).filter(y=>y>=1000&&y<=2999);
-  return years.length>0&&years.every(y=>y>=1512&&y<=1520);
+  // Telif tarihi boş olan eserleri dışlama: araştırma/karşılaştırma listesinde
+  // aday olarak tut, fakat telif tarihini doğrulanmış gibi göstermeyelim.
+  return years.length===0||years.every(y=>y>=1512&&y<=1520);
 };
 
 function Star(){return h('svg',{width:26,height:26,viewBox:'0 0 32 32','aria-hidden':true},h('g',{fill:'none',stroke:'#D2AE5B',strokeWidth:1.6},h('rect',{x:7,y:7,width:18,height:18}),h('rect',{x:7,y:7,width:18,height:18,transform:'rotate(45 16 16)'})))}
@@ -1356,12 +1365,18 @@ function ResearchTools({T,lang,compareId,onCompareChange,dbState,dbError}){
     return !searchTerm||haystack.includes(searchTerm);
   });
   
+  const currentCopiesKey=currentCopies.map(w=>String(w.id)).join('|');
   useEffect(()=>{
     if(!selected)return;
-  
-    setPickedCopyIds(currentCopies.map(w=>String(w.id)));
-  
-  },[selected&&selected[0]]);
+    // Yeni nüsha aynı esere bağlanınca seçici yeniden hesaplanır.
+    // Kullanıcının seçimi korunur; ilk açılışta en fazla iki nüsha seçilir.
+    setPickedCopyIds(prev=>{
+      const valid=prev.filter(id=>currentCopies.some(w=>String(w.id)===id));
+      if(valid.length>=2)return valid;
+      const add=currentCopies.map(w=>String(w.id)).filter(id=>!valid.includes(id)).slice(0,2-valid.length);
+      return [...valid,...add];
+    });
+  },[selected&&selected[0],currentCopiesKey]);
   
   // Only explicitly selected records feed the comparison table.
   const chosenCopies=currentCopies.filter(w=>pickedCopyIds.includes(String(w.id)));
@@ -1406,21 +1421,16 @@ function ResearchTools({T,lang,compareId,onCompareChange,dbState,dbError}){
       // Selectable copy cards make the comparison explicit for visitors.
       const pickerItems=filteredCopies.map(w=>{
         const lib=libOf(w.lib),checked=pickedCopyIds.includes(String(w.id));
-  
-        return h('label',{className:'fcard',key:w.id,style:{display:'block',cursor:'pointer',border:checked?'1px solid var(--gold)':'1px solid var(--line)'}},
-          h('div',{style:{display:'flex',gap:10,alignItems:'start'}},
-            h('input',{type:'checkbox',checked,onChange:e=>{setComparePage(0);setPickedCopyIds(prev=>e.target.checked?[...prev,String(w.id)]:prev.filter(id=>id!==String(w.id)));}}),
-            h('div',null,h('strong',null,LN(lib,T)),h('p',{className:'dim'},cityOf(lib.c).n[lang]||cityOf(lib.c).n.tr),h('p',null,origOf(w)),h('p',{className:'dim'},(w.catNo||'—')+' · '+(w.cpT||'İstinsah tarihi bilinmiyor')))
-          )
+        return h('label',{className:'compare-copy-option',key:w.id},
+          h('input',{type:'checkbox',checked,onChange:e=>{setComparePage(0);setPickedCopyIds(prev=>e.target.checked?[...prev,String(w.id)]:prev.filter(id=>id!==String(w.id)));}}),
+          h('span',{className:'compare-copy-main'},h('strong',null,LN(lib,T)),h('span',{className:'compare-copy-shelf'},(w.catNo||'Katalog no. belirtilmemiş')+' · '+(w.cpT||'İstinsah tarihi bilinmiyor')))
         );
-  
       });
-  
-      const copyPicker=h('details',{className:'panel',style:{marginBottom:18}},
-        h('summary',{style:{cursor:'pointer',fontWeight:700,color:'var(--gold)',padding:'4px 0'}},
-          (lang==='tr'?'Karşılaştırmaya dahil edilecek nüshaları seç · ':'Select copies to compare · ')+currentCopies.length+' '+T.copies+' · '+pickedCopyIds.length+' '+(lang==='tr'?'seçili':'selected')),
-        h('p',{className:'dim'},lang==='tr'?'İstediğiniz kadar fiziksel nüsha seçebilirsiniz. Bilgiler ve mevcut görseller her görünümde en fazla 3 nüsha olacak şekilde yan yana karşılaştırılır. Çok nüsha seçerseniz Önceki/Sonraki düğmeleriyle gruplar arasında geçin. Kayıtlı görseller otomatik kullanılır.':'Select any number of physical copies. Metadata and existing images are compared in groups of up to three. Use Previous/Next to move through larger selections. Linked images load automatically.'),
-        h('div',{className:'btns',style:{marginTop:10}},h('button',{type:'button',className:'btn alt',onClick:()=>{setComparePage(0);setPickedCopyIds(currentCopies.map(w=>String(w.id)));}},lang==='tr'?'Bu eserin tüm nüshalarını seç':'Select all copies'),h('button',{type:'button',className:'btn alt',onClick:()=>{setComparePage(0);setPickedCopyIds([]);}},lang==='tr'?'Seçimi temizle':'Clear selection')),h('div',{className:'cards',style:{marginTop:12}},pickerItems)
+      const copyPicker=h('section',{className:'panel compare-copy-picker',style:{marginBottom:18}},
+        h('h3',{style:{fontSize:'1.2rem',marginBottom:6}},lang==='tr'?'Karşılaştırılacak nüshaları seç':'Choose copies to compare'),
+        h('p',{className:'dim'},(lang==='tr'?'Bu bölüm sürekli açık. Başlangıçta iki nüsha seçilir; daha fazlasını işaretleyerek 3’lü gruplar halinde karşılaştırabilirsin. ':'This selector stays visible. Two copies are selected initially; choose more to compare in groups of three. ')+currentCopies.length+' '+T.copies+' · '+pickedCopyIds.length+' '+(lang==='tr'?'seçili':'selected')),
+        h('div',{className:'btns',style:{marginTop:8}},h('button',{type:'button',className:'btn alt',onClick:()=>{setComparePage(0);setPickedCopyIds(currentCopies.map(w=>String(w.id)));}},lang==='tr'?'Tüm nüshaları seç':'Select all'),h('button',{type:'button',className:'btn alt',onClick:()=>{setComparePage(0);setPickedCopyIds([]);}},lang==='tr'?'Seçimi temizle':'Clear')),
+        h('div',{className:'compare-copy-options'},pickerItems)
       );
   
       // Academic metadata fields shown side by side.
@@ -1428,7 +1438,7 @@ function ResearchTools({T,lang,compareId,onCompareChange,dbState,dbError}){
         [lang==='tr'?'Kütüphane':'Library',w=>LN(libOf(w.lib),T)],
         [lang==='tr'?'Şehir':'City',w=>cityOf(libOf(w.lib).c).n[lang]||cityOf(libOf(w.lib).c).n.tr],
         [T.f.orig,origOf],[T.f.tl,w=>tlOf(w,T)],[T.f.au,w=>auOf(w,T)],
-        [lang==='tr'?'Telif tarihi':'Composition date',w=>w.coT],[T.copyDate,w=>w.cpT],
+        [lang==='tr'?'Telif tarihi':'Composition date',w=>w.coT|| (lang==='tr'?'Telif tarihi doğrulanmalı':'Composition date needs verification')],[T.copyDate,w=>w.cpT],
         [lang==='tr'?'Katalog numarası':'Shelfmark',w=>w.catNo],[lang==='tr'?'Varak sayısı':'Folio count',w=>w.fo],
         [lang==='tr'?'Yazı / dil':'Script / language',w=>w.epT||w.wl],
         [T.collection,w=>w.clT],[T.verification,w=>w.vs==='ok'?T.v.ok:w.vs==='conf'?T.v.conf:T.v.unv],
