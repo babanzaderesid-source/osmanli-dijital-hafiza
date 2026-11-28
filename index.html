@@ -1416,7 +1416,7 @@ function ResearchTools({T,lang,compareId,onCompareChange,dbState,dbError}){
   
       });
   
-      const copyPicker=h('details',{className:'panel',style:{marginBottom:18}},
+      const copyPicker=h('details',{className:'panel',open:true,style:{marginBottom:18}},
         h('summary',{style:{cursor:'pointer',fontWeight:700,color:'var(--gold)',padding:'4px 0'}},
           (lang==='tr'?'Karşılaştırmaya dahil edilecek nüshaları seç · ':'Select copies to compare · ')+currentCopies.length+' '+T.copies+' · '+pickedCopyIds.length+' '+(lang==='tr'?'seçili':'selected')),
         h('p',{className:'dim'},lang==='tr'?'İstediğiniz kadar fiziksel nüsha seçebilirsiniz. Bilgiler ve mevcut görseller her görünümde en fazla 3 nüsha olacak şekilde yan yana karşılaştırılır. Çok nüsha seçerseniz Önceki/Sonraki düğmeleriyle gruplar arasında geçin. Kayıtlı görseller otomatik kullanılır.':'Select any number of physical copies. Metadata and existing images are compared in groups of up to three. Use Previous/Next to move through larger selections. Linked images load automatically.'),
@@ -1463,7 +1463,7 @@ function ResearchTools({T,lang,compareId,onCompareChange,dbState,dbError}){
         }))
       ):null;
 
-      const cards=h('details',{className:'panel',style:{marginTop:16}},
+      const cards=h('details',{className:'panel',open:true,style:{marginTop:16}},
         h('summary',{style:{cursor:'pointer',fontWeight:700,color:'var(--gold)',padding:'4px 0'}},lang==='tr'?'Seçilen eserin tüm nüsha ayrıntılarını aç':'Open all copy details'),
         h('div',{className:'cards',style:{marginTop:14}},currentCopies.map(w=>{
           const library=libOf(w.lib);
